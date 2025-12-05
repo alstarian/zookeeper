@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mama's Home Pizzeria - Authentic Wood-Fired Pizza</title>
+  <title>Ali's Pizza - Modern Artisan Pizzeria</title>
   
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
     * {
       margin: 0;
       padding: 0;
@@ -13,408 +15,507 @@
     }
     
     :root {
-      --pizza-red: #e74c3c;
-      --pizza-orange: #e67e22;
-      --pizza-green: #27ae60;
-      --dark: #2c3e50;
-      --light: #ecf0f1;
-      --cream: #f8f9fa;
+      --primary: #FF6B35;
+      --dark: #0a0a0a;
+      --light: #ffffff;
+      --gray: #666;
+      --gray-light: #f5f5f7;
     }
     
     body {
-      font-family: 'Georgia', serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       color: var(--dark);
+      background: var(--light);
       overflow-x: hidden;
+      line-height: 1.6;
     }
     
-    /* Navbar */
+    /* Navbar - Ultra minimal */
     .navbar {
       position: fixed;
       top: 0;
       width: 100%;
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
       z-index: 1000;
-      transition: all 0.3s ease;
-    }
-    
-    .navbar.scrolled {
-      padding: 10px 0;
-      box-shadow: 0 4px 30px rgba(0,0,0,0.15);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .nav-container {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 20px 40px;
+      padding: 16px 48px;
     }
     
     .logo {
-      font-size: 32px;
-      font-weight: bold;
-      color: var(--pizza-red);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--dark);
       text-decoration: none;
-      font-family: 'Brush Script MT', cursive;
+      letter-spacing: -0.5px;
     }
     
     .nav-links {
       display: flex;
-      gap: 40px;
+      gap: 48px;
       list-style: none;
+      align-items: center;
     }
     
     .nav-links a {
       text-decoration: none;
-      color: var(--dark);
-      font-weight: 600;
-      font-size: 16px;
-      transition: color 0.3s;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--gray);
+      font-weight: 500;
+      font-size: 15px;
+      transition: color 0.2s;
     }
     
     .nav-links a:hover {
-      color: var(--pizza-red);
+      color: var(--dark);
     }
     
     .order-btn {
-      background: var(--pizza-red);
+      background: var(--dark);
       color: white;
-      padding: 12px 28px;
-      border-radius: 30px;
-      text-decoration: none;
-      font-weight: bold;
-      transition: all 0.3s;
-      box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 10px 24px;
+      border-radius: 100px;
+      font-weight: 600;
+      transition: all 0.2s;
     }
     
     .order-btn:hover {
-      background: #c0392b;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+      background: var(--primary);
+      color: white;
+      transform: scale(1.02);
     }
     
-    /* Mobile menu toggle */
     .mobile-toggle {
       display: none;
-      font-size: 28px;
+      font-size: 24px;
       cursor: pointer;
       color: var(--dark);
     }
     
-    /* Hero Section */
+    /* Hero - Full screen minimal */
     .hero {
-      height: 100vh;
-      background: linear-gradient(135deg, rgba(231, 76, 60, 0.9), rgba(230, 126, 34, 0.9)),
-                  url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect fill="%23f8f9fa" width="1200" height="800"/><circle cx="200" cy="200" r="100" fill="%23e74c3c" opacity="0.1"/><circle cx="800" cy="400" r="150" fill="%2327ae60" opacity="0.1"/><circle cx="1000" cy="600" r="120" fill="%23e67e22" opacity="0.1"/></svg>');
-      background-size: cover;
-      background-position: center;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      text-align: center;
-      color: white;
+      padding: 120px 48px 80px;
+      background: linear-gradient(180deg, #ffffff 0%, #f5f5f7 100%);
       position: relative;
       overflow: hidden;
     }
     
-    .hero::before {
-      content: '🍕';
-      position: absolute;
-      font-size: 400px;
-      opacity: 0.1;
-      animation: float 6s ease-in-out infinite;
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-30px) rotate(10deg); }
-    }
-    
     .hero-content {
-      z-index: 1;
-      max-width: 800px;
-      padding: 20px;
-      animation: fadeInUp 1s ease;
+      max-width: 1400px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
     }
     
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(40px); }
-      to { opacity: 1; transform: translateY(0); }
+    .hero-text h1 {
+      font-size: 80px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -2px;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
-    .hero h1 {
-      font-size: 72px;
-      margin-bottom: 20px;
-      line-height: 1.2;
-      text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      font-family: 'Georgia', serif;
-    }
-    
-    .hero p {
-      font-size: 24px;
+    .hero-text p {
+      font-size: 20px;
+      color: var(--gray);
       margin-bottom: 40px;
-      opacity: 0.95;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 400;
+      line-height: 1.7;
+    }
+    
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+    }
+    
+    .btn {
+      padding: 16px 40px;
+      border-radius: 100px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-block;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .btn-primary {
+      background: var(--dark);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(255, 107, 53, 0.3);
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: var(--dark);
+      border: 2px solid var(--dark);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--dark);
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .hero-image {
+      width: 100%;
+      height: 600px;
+      background: linear-gradient(135deg, #FF6B35 0%, #FF8E53 100%);
+      border-radius: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 240px;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero-image::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: shimmer 8s ease-in-out infinite;
+    }
+    
+    @keyframes shimmer {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(180deg); }
+    }
+    
+    /* Features - Clean grid */
+    .features {
+      padding: 120px 48px;
+      background: white;
+    }
+    
+    .section-header {
+      max-width: 700px;
+      margin: 0 auto 80px;
+      text-align: center;
+    }
+    
+    .section-header h2 {
+      font-size: 56px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      margin-bottom: 16px;
+    }
+    
+    .section-header p {
+      font-size: 18px;
+      color: var(--gray);
+    }
+    
+    .features-grid {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+    }
+    
+    .feature-card {
+      padding: 48px 32px;
+      background: var(--gray-light);
+      border-radius: 24px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-8px);
+      background: white;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    }
+    
+    .feature-icon {
+      font-size: 56px;
+      margin-bottom: 24px;
+      display: block;
+    }
+    
+    .feature-card h3 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+    
+    .feature-card p {
+      font-size: 16px;
+      color: var(--gray);
+      line-height: 1.7;
+    }
+    
+    /* Menu - Modern cards */
+    .menu {
+      padding: 120px 48px;
+      background: var(--gray-light);
+    }
+    
+    .menu-grid {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      margin-top: 80px;
+    }
+    
+    .menu-card {
+      background: white;
+      border-radius: 24px;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    
+    .menu-card:hover {
+      transform: translateY(-12px);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.12);
+    }
+    
+    .menu-image {
+      width: 100%;
+      height: 300px;
+      background: linear-gradient(135deg, #FF6B35 0%, #FF8E53 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 120px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .menu-card:hover .menu-image {
+      transform: scale(1.05);
+    }
+    
+    .menu-info {
+      padding: 32px;
+    }
+    
+    .menu-card h3 {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    
+    .menu-card p {
+      font-size: 15px;
+      color: var(--gray);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    
+    .menu-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .price {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--dark);
+      letter-spacing: -1px;
+    }
+    
+    .add-btn {
+      padding: 10px 20px;
+      background: var(--dark);
+      color: white;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    
+    .add-btn:hover {
+      background: var(--primary);
+    }
+    
+    /* CTA Section */
+    .cta {
+      padding: 120px 48px;
+      background: var(--dark);
+      color: white;
+      text-align: center;
+    }
+    
+    .cta h2 {
+      font-size: 64px;
+      font-weight: 800;
+      margin-bottom: 24px;
+      letter-spacing: -2px;
+    }
+    
+    .cta p {
+      font-size: 20px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 48px;
     }
     
     .cta-buttons {
       display: flex;
       gap: 20px;
       justify-content: center;
-      flex-wrap: wrap;
     }
     
-    .btn {
-      padding: 18px 40px;
-      border-radius: 50px;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 18px;
-      transition: all 0.3s;
-      display: inline-block;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-    
-    .btn-primary {
+    .btn-white {
       background: white;
-      color: var(--pizza-red);
-      box-shadow: 0 6px 25px rgba(0,0,0,0.2);
+      color: var(--dark);
     }
     
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+    .btn-white:hover {
+      background: var(--primary);
+      color: white;
     }
     
-    .btn-secondary {
+    .btn-outline {
       background: transparent;
       color: white;
-      border: 3px solid white;
+      border: 2px solid white;
     }
     
-    .btn-secondary:hover {
+    .btn-outline:hover {
       background: white;
-      color: var(--pizza-red);
-      transform: translateY(-3px);
+      color: var(--dark);
     }
     
-    /* Features Section */
-    .features {
-      padding: 100px 40px;
-      background: var(--cream);
+    /* Footer */
+    .footer {
+      padding: 80px 48px 40px;
+      background: #000;
+      color: white;
     }
     
-    .section-title {
-      text-align: center;
-      font-size: 48px;
+    .footer-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 60px;
       margin-bottom: 60px;
-      color: var(--dark);
     }
     
-    .features-grid {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 40px;
-    }
-    
-    .feature-card {
-      background: white;
-      padding: 40px;
-      border-radius: 20px;
-      text-align: center;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-      transition: all 0.3s;
-    }
-    
-    .feature-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 50px rgba(0,0,0,0.12);
-    }
-    
-    .feature-icon {
-      font-size: 80px;
-      margin-bottom: 20px;
-      display: block;
-    }
-    
-    .feature-card h3 {
-      font-size: 28px;
-      margin-bottom: 15px;
-      color: var(--pizza-red);
-    }
-    
-    .feature-card p {
-      font-size: 16px;
-      line-height: 1.8;
-      color: #555;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-    
-    /* Menu Preview */
-    .menu-preview {
-      padding: 100px 40px;
-      background: white;
-    }
-    
-    .menu-grid {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 30px;
-      margin-top: 60px;
-    }
-    
-    .menu-item {
-      background: var(--cream);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-      transition: all 0.3s;
-    }
-    
-    .menu-item:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-    }
-    
-    .menu-image {
-      width: 100%;
-      height: 250px;
-      background: linear-gradient(135deg, var(--pizza-red), var(--pizza-orange));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 120px;
-    }
-    
-    .menu-info {
-      padding: 25px;
-    }
-    
-    .menu-item h3 {
+    .footer-brand h3 {
       font-size: 24px;
-      margin-bottom: 10px;
-      color: var(--dark);
+      font-weight: 700;
+      margin-bottom: 16px;
     }
     
-    .menu-item p {
+    .footer-brand p {
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.7;
+    }
+    
+    .footer-links h4 {
       font-size: 14px;
-      color: #666;
-      margin-bottom: 15px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-    
-    .price {
-      font-size: 28px;
-      font-weight: bold;
-      color: var(--pizza-red);
-    }
-    
-    /* About Section */
-    .about {
-      padding: 100px 40px;
-      background: linear-gradient(135deg, var(--pizza-red), var(--pizza-orange));
-      color: white;
-      text-align: center;
-    }
-    
-    .about-content {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    
-    .about h2 {
-      font-size: 48px;
-      margin-bottom: 30px;
-    }
-    
-    .about p {
-      font-size: 20px;
-      line-height: 1.8;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
       margin-bottom: 20px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: rgba(255, 255, 255, 0.5);
     }
     
-    /* Contact/Footer */
-    .contact {
-      padding: 80px 40px;
-      background: var(--dark);
-      color: white;
-      text-align: center;
+    .footer-links ul {
+      list-style: none;
     }
     
-    .contact h2 {
-      font-size: 42px;
-      margin-bottom: 20px;
+    .footer-links ul li {
+      margin-bottom: 12px;
     }
     
-    .contact p {
-      font-size: 18px;
-      margin-bottom: 30px;
-      opacity: 0.9;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-    
-    .contact-info {
-      display: flex;
-      gap: 50px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-top: 40px;
-    }
-    
-    .contact-item {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    
-    .contact-item span {
-      font-size: 40px;
-    }
-    
-    .contact-item a {
-      color: var(--pizza-orange);
+    .footer-links a {
+      color: rgba(255, 255, 255, 0.8);
       text-decoration: none;
-      font-size: 20px;
-      font-weight: bold;
+      transition: color 0.2s;
+    }
+    
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+    
+    .footer-bottom {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-top: 40px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 14px;
     }
     
     .social-links {
       display: flex;
       gap: 20px;
-      justify-content: center;
-      margin-top: 40px;
-      font-size: 36px;
     }
     
     .social-links a {
-      color: white;
-      transition: all 0.3s;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 20px;
+      transition: all 0.2s;
     }
     
     .social-links a:hover {
-      color: var(--pizza-orange);
-      transform: scale(1.2);
-    }
-    
-    .footer {
-      padding: 30px;
-      background: #1a1a1a;
-      text-align: center;
-      color: #888;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--primary);
+      transform: translateY(-2px);
     }
     
     /* Responsive */
+    @media (max-width: 1024px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        gap: 60px;
+      }
+      
+      .hero-text h1 {
+        font-size: 64px;
+      }
+      
+      .features-grid,
+      .menu-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .footer-content {
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+      }
+    }
+    
     @media (max-width: 768px) {
       .mobile-toggle {
         display: block;
@@ -423,48 +524,87 @@
       .nav-links {
         display: none;
         position: absolute;
-        top: 80px;
+        top: 70px;
         left: 0;
         right: 0;
         background: white;
         flex-direction: column;
-        padding: 20px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 24px;
+        gap: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
       }
       
       .nav-links.active {
         display: flex;
       }
       
-      .hero h1 {
+      .hero {
+        padding: 100px 24px 60px;
+      }
+      
+      .hero-text h1 {
         font-size: 48px;
       }
       
-      .hero p {
-        font-size: 18px;
+      .hero-image {
+        height: 400px;
+        font-size: 160px;
       }
       
-      .section-title {
-        font-size: 36px;
+      .section-header h2 {
+        font-size: 40px;
       }
       
+      .features,
+      .menu,
+      .cta {
+        padding: 80px 24px;
+      }
+      
+      .features-grid,
+      .menu-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      
+      .hero-buttons,
       .cta-buttons {
         flex-direction: column;
-        gap: 15px;
+        width: 100%;
       }
       
       .btn {
         width: 100%;
+        text-align: center;
+      }
+      
+      .footer {
+        padding: 60px 24px 32px;
+      }
+      
+      .footer-content {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      
+      .footer-bottom {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+      
+      .cta h2 {
+        font-size: 42px;
       }
     }
   </style>
 </head>
 
 <body>
-  <!-- Navigation -->
-  <nav class="navbar" id="navbar">
+  <!-- Navbar -->
+  <nav class="navbar">
     <div class="nav-container">
-      <a href="#" class="logo">🍕 Mama's Pizzeria</a>
+      <a href="#" class="logo">Ali's Pizza</a>
       
       <ul class="nav-links" id="navLinks">
         <li><a href="#menu">Menu</a></li>
@@ -477,192 +617,220 @@
     </div>
   </nav>
 
-  <!-- Hero Section -->
+  <!-- Hero -->
   <section class="hero">
     <div class="hero-content">
-      <h1>Authentic Wood-Fired Pizza</h1>
-      <p>Made with love in our home kitchen. Fresh ingredients, traditional recipes, delivered hot to your door.</p>
-      <div class="cta-buttons">
-        <a href="#menu" class="btn btn-primary">View Menu</a>
-        <a href="tel:+1234567890" class="btn btn-secondary">📞 Call to Order</a>
+      <div class="hero-text">
+        <h1>Wood-Fired Perfection</h1>
+        <p>Handcrafted artisan pizza made with locally-sourced ingredients. Baked fresh in our wood-fired oven.</p>
+        <div class="hero-buttons">
+          <a href="#menu" class="btn btn-primary">View Menu</a>
+          <a href="tel:+1234567890" class="btn btn-secondary">Call to Order</a>
+        </div>
       </div>
+      <div class="hero-image">🍕</div>
     </div>
   </section>
 
   <!-- Features -->
   <section class="features">
-    <h2 class="section-title">Why Choose Us?</h2>
+    <div class="section-header">
+      <h2>Why Ali's?</h2>
+      <p>We obsess over every detail to bring you the perfect pizza experience</p>
+    </div>
+    
     <div class="features-grid">
       <div class="feature-card">
         <span class="feature-icon">🔥</span>
-        <h3>Wood-Fired Oven</h3>
-        <p>Authentic Italian-style wood-fired oven for that perfect crispy crust and smoky flavor.</p>
+        <h3>Wood-Fired</h3>
+        <p>Authentic Italian wood-fired oven reaches 900°F for the perfect crispy crust.</p>
       </div>
       
       <div class="feature-card">
-        <span class="feature-icon">🌿</span>
-        <h3>Fresh Ingredients</h3>
-        <p>Only the finest locally-sourced ingredients. No preservatives, no shortcuts, just real food.</p>
+        <span class="feature-icon">🌾</span>
+        <h3>Fresh Daily</h3>
+        <p>Dough made fresh every morning. Ingredients sourced from local farms.</p>
       </div>
       
       <div class="feature-card">
-        <span class="feature-icon">🏠</span>
-        <h3>Homemade Love</h3>
-        <p>Family recipes passed down through generations. Made with care in small batches.</p>
-      </div>
-      
-      <div class="feature-card">
-        <span class="feature-icon">🚗</span>
+        <span class="feature-icon">⚡</span>
         <h3>Fast Delivery</h3>
-        <p>Hot and fresh to your door within 30-45 minutes. Free delivery on orders over $25.</p>
+        <p>Hot to your door in under 30 minutes. Free delivery on orders over $25.</p>
       </div>
       
       <div class="feature-card">
         <span class="feature-icon">🎨</span>
-        <h3>Custom Orders</h3>
-        <p>Special dietary needs? Custom toppings? We'll make it exactly how you want it.</p>
+        <h3>Fully Custom</h3>
+        <p>Build your dream pizza. Any toppings, any style, exactly how you want it.</p>
+      </div>
+      
+      <div class="feature-card">
+        <span class="feature-icon">🌱</span>
+        <h3>Options for All</h3>
+        <p>Vegan cheese, gluten-free crust, and vegetarian options available.</p>
       </div>
       
       <div class="feature-card">
         <span class="feature-icon">💯</span>
-        <h3>100% Satisfaction</h3>
-        <p>Not happy? We'll remake it or refund you. Your happiness is our priority.</p>
+        <h3>Love Guarantee</h3>
+        <p>Not perfect? We'll remake it or refund you. Your satisfaction matters.</p>
       </div>
     </div>
   </section>
 
-  <!-- Menu Preview -->
-  <section class="menu-preview" id="menu">
-    <h2 class="section-title">Our Signature Pizzas</h2>
+  <!-- Menu -->
+  <section class="menu" id="menu">
+    <div class="section-header">
+      <h2>Signature Pizzas</h2>
+      <p>Each pizza is a masterpiece, crafted with care</p>
+    </div>
+    
     <div class="menu-grid">
-      <div class="menu-item">
+      <div class="menu-card">
         <div class="menu-image">🍕</div>
         <div class="menu-info">
           <h3>Margherita</h3>
-          <p>Classic tomato sauce, fresh mozzarella, basil, olive oil</p>
-          <div class="price">$16</div>
+          <p>San Marzano tomatoes, fresh mozzarella, basil, extra virgin olive oil</p>
+          <div class="menu-footer">
+            <div class="price">$16</div>
+            <div class="add-btn">Add</div>
+          </div>
         </div>
       </div>
       
-      <div class="menu-item">
+      <div class="menu-card">
         <div class="menu-image">🍕</div>
         <div class="menu-info">
-          <h3>Pepperoni Passion</h3>
-          <p>Double pepperoni, mozzarella, secret tomato sauce</p>
-          <div class="price">$18</div>
+          <h3>Pepperoni</h3>
+          <p>Double pepperoni, mozzarella, house tomato sauce, oregano</p>
+          <div class="menu-footer">
+            <div class="price">$18</div>
+            <div class="add-btn">Add</div>
+          </div>
         </div>
       </div>
       
-      <div class="menu-item">
+      <div class="menu-card">
         <div class="menu-image">🍕</div>
         <div class="menu-info">
-          <h3>Supreme Deluxe</h3>
-          <p>Pepperoni, sausage, peppers, onions, mushrooms, olives</p>
-          <div class="price">$22</div>
+          <h3>Supreme</h3>
+          <p>Pepperoni, sausage, peppers, onions, mushrooms, black olives</p>
+          <div class="menu-footer">
+            <div class="price">$22</div>
+            <div class="add-btn">Add</div>
+          </div>
         </div>
       </div>
       
-      <div class="menu-item">
+      <div class="menu-card">
         <div class="menu-image">🍕</div>
         <div class="menu-info">
           <h3>BBQ Chicken</h3>
-          <p>Grilled chicken, BBQ sauce, red onions, cilantro</p>
-          <div class="price">$20</div>
+          <p>Grilled chicken, house BBQ sauce, red onions, fresh cilantro</p>
+          <div class="menu-footer">
+            <div class="price">$20</div>
+            <div class="add-btn">Add</div>
+          </div>
         </div>
       </div>
       
-      <div class="menu-item">
+      <div class="menu-card">
         <div class="menu-image">🍕</div>
         <div class="menu-info">
-          <h3>Veggie Garden</h3>
-          <p>Spinach, mushrooms, peppers, onions, tomatoes, olives</p>
-          <div class="price">$19</div>
+          <h3>Garden Fresh</h3>
+          <p>Spinach, mushrooms, bell peppers, red onions, cherry tomatoes</p>
+          <div class="menu-footer">
+            <div class="price">$19</div>
+            <div class="add-btn">Add</div>
+          </div>
         </div>
       </div>
       
-      <div class="menu-item">
+      <div class="menu-card">
         <div class="menu-image">🍕</div>
         <div class="menu-info">
           <h3>Meat Lovers</h3>
-          <p>Pepperoni, sausage, bacon, ham, ground beef</p>
-          <div class="price">$24</div>
+          <p>Pepperoni, Italian sausage, bacon, ham, seasoned beef</p>
+          <div class="menu-footer">
+            <div class="price">$24</div>
+            <div class="add-btn">Add</div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- About -->
-  <section class="about" id="about">
-    <div class="about-content">
-      <h2>Our Story</h2>
-      <p>What started as making pizza for family dinners has become a neighborhood favorite. We use my grandmother's 70-year-old recipe and cook every pizza in our custom-built wood-fired oven.</p>
-      <p>Every pizza is made to order with hand-stretched dough, homemade sauce, and the freshest toppings we can find. No frozen crusts, no pre-made sauce – just authentic, delicious pizza made with love.</p>
-      <p><strong>Thank you for supporting our small family business! 🍕❤️</strong></p>
-    </div>
-  </section>
-
-  <!-- Contact -->
-  <section class="contact" id="contact">
+  <!-- CTA -->
+  <section class="cta" id="order">
     <h2>Ready to Order?</h2>
-    <p>Call us, text us, or order online for pickup or delivery</p>
-    
-    <div class="contact-info">
-      <div class="contact-item">
-        <span>📞</span>
-        <a href="tel:+1234567890">(123) 456-7890</a>
-      </div>
-      
-      <div class="contact-item">
-        <span>📧</span>
-        <a href="mailto:order@mamaspizzeria.com">order@mamaspizzeria.com</a>
-      </div>
-      
-      <div class="contact-item">
-        <span>📍</span>
-        <a href="#">123 Main Street, Your City</a>
-      </div>
-    </div>
-    
-    <div class="social-links">
-      <a href="#">📘</a>
-      <a href="#">📷</a>
-      <a href="#">🐦</a>
+    <p>Fresh pizza delivered to your door in 30 minutes or less</p>
+    <div class="cta-buttons">
+      <a href="tel:+1234567890" class="btn btn-white">📞 (123) 456-7890</a>
+      <a href="mailto:order@alispizza.com" class="btn btn-outline">📧 Email Us</a>
     </div>
   </section>
 
   <!-- Footer -->
   <footer class="footer">
-    <p>&copy; 2025 Mama's Home Pizzeria. Made with ❤️ and 🍕</p>
-    <p>Hours: Wed-Sun 4PM-10PM | Licensed Home Kitchen</p>
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>Ali's Pizza</h3>
+        <p>Handcrafted artisan pizza made with love. Fresh ingredients, traditional methods, modern taste.</p>
+      </div>
+      
+      <div class="footer-links">
+        <h4>Menu</h4>
+        <ul>
+          <li><a href="#">Pizzas</a></li>
+          <li><a href="#">Appetizers</a></li>
+          <li><a href="#">Salads</a></li>
+          <li><a href="#">Desserts</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-links">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Locations</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Allergen Info</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2025 Ali's Pizza. All rights reserved.</p>
+      <div class="social-links">
+        <a href="#">📘</a>
+        <a href="#">📷</a>
+        <a href="#">🐦</a>
+      </div>
+    </div>
   </footer>
 
   <script>
-    // Navbar scroll effect
-    window.addEventListener('scroll', () => {
-      const navbar = document.getElementById('navbar');
-      if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
-      }
-    });
-    
-    // Mobile menu toggle
+    // Mobile menu
     document.getElementById('mobileToggle').addEventListener('click', () => {
       document.getElementById('navLinks').classList.toggle('active');
     });
     
-    // Smooth scroll for navigation links
+    // Smooth scroll
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
         e.preventDefault();
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
-          target.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-          // Close mobile menu after click
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
           document.getElementById('navLinks').classList.remove('active');
         }
       });
