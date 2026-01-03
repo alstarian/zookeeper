@@ -375,7 +375,6 @@
             if (!audioInitialized) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 audioInitialized = true;
-                console.log('Audio initialized');
             }
         }
 
@@ -383,7 +382,6 @@
             if (!audioCtx) return;
 
             try {
-                // Resume context if suspended (iOS requirement)
                 if (audioCtx.state === 'suspended') {
                     audioCtx.resume();
                 }
@@ -397,9 +395,7 @@
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
                 osc.start();
                 osc.stop(audioCtx.currentTime + duration);
-            } catch(e) {
-                console.log('Audio error:', e);
-            }
+            } catch(e) {}
         }
 
         function catchSound() {
@@ -415,9 +411,9 @@
 
         // Canvas setup
         const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: false });
 
-        // High DPI support for sharp rendering on iPhone
+        // High DPI support
         const dpr = window.devicePixelRatio || 1;
         const rect = canvas.getBoundingClientRect();
         canvas.width = rect.width * dpr;
@@ -439,7 +435,7 @@
         let difficulty = 1;
         let stars = [];
 
-        // Create stars for background
+        // Create stars
         for(let i = 0; i < 100; i++) {
             stars.push({
                 x: Math.random() * gameWidth,
@@ -450,7 +446,7 @@
             });
         }
 
-        // Player (zookeeper)
+        // Player
         const player = {
             x: gameWidth / 2 - 40,
             y: gameHeight - 110,
@@ -466,7 +462,6 @@
             { emoji: '🦁', name: 'lion', points: 25, baseSpeed: 4, color: '#FFD700' }
         ];
 
-        // Draw starry background
         function drawStars() {
             stars.forEach(star => {
                 star.twinkle += 0.02;
@@ -478,7 +473,6 @@
             });
         }
 
-        // Draw modern ground
         function drawGround() {
             const gradient = ctx.createLinearGradient(0, gameHeight - 90, 0, gameHeight);
             gradient.addColorStop(0, 'rgba(45, 55, 72, 0.6)');
@@ -486,7 +480,6 @@
             ctx.fillStyle = gradient;
             ctx.fillRect(0, gameHeight - 90, gameWidth, 90);
 
-            // Glow line at top of ground
             ctx.strokeStyle = 'rgba(102, 126, 234, 0.3)';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -523,7 +516,7 @@
             ctx.arc(player.x + 40, player.y + 40, player.radius + 20, 0, Math.PI * 2);
             ctx.fill();
 
-            // Inner circular platform
+            // Platform
             const platform = ctx.createRadialGradient(
                 player.x + 40, player.y + 40, 0,
                 player.x + 40, player.y + 40, player.radius
@@ -542,21 +535,14 @@
             ctx.arc(player.x + 40, player.y + 40, player.radius + 5, 0, Math.PI * 2);
             ctx.stroke();
 
-            // Modern zookeeper with proper emoji rendering
-            ctx.save();
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            ctx.shadowBlur = 15;
-            ctx.shadowOffsetY = 5;
-
-            // Use default emoji rendering (no filters)
-            ctx.font = '36px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+            // Draw emojis WITHOUT any shadows or effects that cause opacity issues
+            ctx.fillStyle = '#000000'; // Set explicit fill color
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
+            ctx.font = '36px Arial, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
             ctx.fillText('🧍', player.x + 25, player.y + 40);
-            ctx.font = '34px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+            ctx.font = '34px Arial, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
             ctx.fillText('🥅', player.x + 55, player.y + 38);
-
-            ctx.restore();
         }
 
         function drawAnimals() {
@@ -568,15 +554,13 @@
                 ctx.translate(a.x + swerveX, a.y);
                 ctx.rotate(a.rotation);
 
-                // Glow effect
-                ctx.shadowColor = a.type.color;
-                ctx.shadowBlur = 20;
-
-                // Proper emoji rendering for iOS
-                ctx.font = '48px "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+                // NO shadows - just draw the emoji directly
+                ctx.fillStyle = '#000000';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
+                ctx.font = '48px Arial, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
                 ctx.fillText(a.type.emoji, 0, 0);
+
                 ctx.restore();
 
                 a.rotation += 0.05;
@@ -673,7 +657,6 @@
         }
 
         function startGame() {
-            // Initialize audio on first user interaction
             initAudio();
 
             document.getElementById('overlay').classList.add('hidden');
