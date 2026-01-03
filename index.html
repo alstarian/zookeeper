@@ -2,288 +2,565 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catch the Falling Stars!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Zoo Keeper - Catch the Animals!</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
         }
 
         body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(to bottom, #1a1a2e, #16213e);
-            font-family: Arial, sans-serif;
-            touch-action: none;
         }
 
-        #gameContainer {
-            text-align: center;
+        #gameWrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 430px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         canvas {
-            background: linear-gradient(to bottom, #0f3460, #16213e);
-            border: 3px solid #e94560;
-            border-radius: 10px;
             display: block;
-            margin: 20px auto;
-            max-width: 100%;
+            background: linear-gradient(180deg, #87CEEB 0%, #98D8E8 50%, #90EE90 100%);
+            border-radius: 0;
+            width: 100vw;
+            height: 100vh;
+            max-width: 430px;
+            max-height: 932px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.3);
             touch-action: none;
         }
 
-        #score {
-            color: #fff;
-            font-size: 24px;
-            margin: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-
-        #gameOver {
-            display: none;
-            position: fixed;
-            top: 50%;
+        #ui {
+            position: absolute;
+            top: 60px;
             left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.9);
-            color: white;
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
             z-index: 10;
         }
 
-        button {
-            background: #e94560;
+        .stat {
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(15px);
+            border: 3px solid rgba(255,255,255,0.4);
+            border-radius: 20px;
+            padding: 12px 24px;
             color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         }
 
-        button:hover {
-            background: #c23550;
+        .stat-label {
+            font-size: 11px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: linear-gradient(135deg, rgba(86,171,47,0.95) 0%, rgba(168,224,99,0.95) 100%);
+            border-radius: 30px;
+            padding: 45px 35px;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+            border: 3px solid rgba(255,255,255,0.3);
+            max-width: 90%;
+            width: 360px;
+        }
+
+        h1 {
+            font-size: 44px;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        h2 {
+            font-size: 36px;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        p {
+            font-size: 17px;
+            color: rgba(255,255,255,0.95);
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+
+        .animal-list {
+            background: rgba(255,255,255,0.15);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .animal-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 18px;
+            color: white;
+        }
+
+        .animal-emoji {
+            font-size: 32px;
+        }
+
+        .animal-points {
+            font-weight: 700;
+            color: #FFD700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        #finalScoreText {
+            font-size: 56px;
+            font-weight: 700;
+            color: #FFD700;
+            margin: 20px 0;
+            text-shadow: 0 4px 20px rgba(255,215,0,0.5);
+        }
+
+        button {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 20px;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255,107,107,0.4);
+            font-family: 'Poppins', sans-serif;
+            margin-top: 15px;
+            transition: transform 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #combo {
+            position: absolute;
+            top: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 26px;
+            font-weight: 700;
+            color: #FFD700;
+            text-shadow: 0 0 20px rgba(255,215,0,0.8), 0 2px 4px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 10;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <div id="gameContainer">
-        <div id="score">Score: 0 | Lives: 3</div>
-        <canvas id="gameCanvas"></canvas>
-        <div id="gameOver">
-            <h2>Game Over!</h2>
-            <p id="finalScore"></p>
-            <button onclick="restartGame()">Play Again</button>
+    <div id="gameWrapper">
+        <div id="ui">
+            <div class="stat">
+                <div class="stat-label">Score</div>
+                <div class="stat-value" id="scoreText">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Lives</div>
+                <div class="stat-value" id="livesText">❤️❤️❤️</div>
+            </div>
+        </div>
+
+        <div id="combo"></div>
+
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <div id="overlay">
+        <div class="modal">
+            <h1>🦁 Zoo Keeper</h1>
+            <p>Help the zookeeper catch escaped animals!</p>
+            <div class="animal-list">
+                <div class="animal-item">
+                    <span class="animal-emoji">🐰</span>
+                    <span>Rabbit</span>
+                    <span class="animal-points">10 pts</span>
+                </div>
+                <div class="animal-item">
+                    <span class="animal-emoji">🐼</span>
+                    <span>Panda</span>
+                    <span class="animal-points">15 pts</span>
+                </div>
+                <div class="animal-item">
+                    <span class="animal-emoji">🦁</span>
+                    <span>Lion</span>
+                    <span class="animal-points">20 pts</span>
+                </div>
+                <div class="animal-item">
+                    <span class="animal-emoji">🦒</span>
+                    <span>Giraffe</span>
+                    <span class="animal-points">25 pts</span>
+                </div>
+                <div class="animal-item">
+                    <span class="animal-emoji">🦓</span>
+                    <span>Zebra</span>
+                    <span class="animal-points">30 pts</span>
+                </div>
+            </div>
+            <p style="font-size: 15px;">
+                📱 Swipe left & right to catch!
+            </p>
+            <button id="startButton">Start Game</button>
+        </div>
+    </div>
+
+    <div id="gameOverScreen" class="hidden">
+        <div class="modal">
+            <h2>Mission Complete!</h2>
+            <div id="finalScoreText">0</div>
+            <p id="message"></p>
+            <p id="animalsCaught"></p>
+            <button id="restartButton">Play Again</button>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
+        const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+        const startButton = document.getElementById('startButton');
+        const restartButton = document.getElementById('restartButton');
+        const overlay = document.getElementById('overlay');
+        const gameOverScreen = document.getElementById('gameOverScreen');
 
-        // Set canvas size
-        canvas.width = Math.min(window.innerWidth - 20, 400);
-        canvas.height = 600;
+        // Optimize canvas for iPhone
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.min(window.innerWidth, 430) * dpr;
+        canvas.height = Math.min(window.innerHeight, 932) * dpr;
+        canvas.style.width = Math.min(window.innerWidth, 430) + 'px';
+        canvas.style.height = Math.min(window.innerHeight, 932) + 'px';
+        ctx.scale(dpr, dpr);
 
-        // Game variables
+        const gameWidth = canvas.width / dpr;
+        const gameHeight = canvas.height / dpr;
+
+        let gameActive = false;
         let score = 0;
         let lives = 3;
-        let gameRunning = true;
-        let animationId;
+        let objects = [];
+        let lastSpawn = 0;
+        let combo = 0;
+        let lastCatchTime = 0;
+        let animalsCaught = { rabbit: 0, panda: 0, lion: 0, giraffe: 0, zebra: 0 };
 
-        // Basket (player)
-        const basket = {
-            width: 80,
-            height: 60,
-            x: canvas.width / 2 - 40,
-            y: canvas.height - 80,
-            speed: 8,
-            moveLeft: false,
-            moveRight: false
+        const player = {
+            x: gameWidth / 2 - 50,
+            y: gameHeight - 120,
+            width: 100,
+            height: 80
         };
 
-        // Falling objects
-        let fallingObjects = [];
-        let lastObjectTime = 0;
-        const objectSpawnInterval = 1000; // milliseconds
-
-        // Object types
-        const objectTypes = [
-            { emoji: '⭐', points: 10, color: '#FFD700' },
-            { emoji: '🍎', points: 15, color: '#FF4444' },
-            { emoji: '🎁', points: 20, color: '#44FF44' },
-            { emoji: '💎', points: 25, color: '#44DDFF' }
+        const animals = [
+            { emoji: '🐰', points: 10, name: 'rabbit', speed: 2.5 },
+            { emoji: '🐼', points: 15, name: 'panda', speed: 2.8 },
+            { emoji: '🦁', points: 20, name: 'lion', speed: 3.2 },
+            { emoji: '🦒', points: 25, name: 'giraffe', speed: 3.5 },
+            { emoji: '🦓', points: 30, name: 'zebra', speed: 4.0 }
         ];
 
-        // Create falling object
-        function createFallingObject() {
-            const type = objectTypes[Math.floor(Math.random() * objectTypes.length)];
-            return {
-                x: Math.random() * (canvas.width - 40),
-                y: -40,
-                width: 40,
-                height: 40,
-                speed: 2 + Math.random() * 2,
-                type: type
-            };
-        }
-
-        // Draw basket
-        function drawBasket() {
-            ctx.fillStyle = '#8B4513';
-            ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
-            ctx.fillStyle = '#A0522D';
-            ctx.fillRect(basket.x + 5, basket.y + 5, basket.width - 10, basket.height - 10);
+        // Draw clouds
+        function drawClouds() {
+            ctx.font = '40px Arial';
+            ctx.fillText('☁️', gameWidth * 0.2, 80);
+            ctx.fillText('☁️', gameWidth * 0.7, 60);
             ctx.font = '30px Arial';
-            ctx.fillText('🧺', basket.x + 20, basket.y + 40);
+            ctx.fillText('☁️', gameWidth * 0.5, 100);
         }
 
-        // Draw falling objects
-        function drawFallingObjects() {
-            fallingObjects.forEach(obj => {
-                ctx.font = '35px Arial';
-                ctx.fillText(obj.type.emoji, obj.x, obj.y + 35);
+        // Draw ground
+        function drawGround() {
+            ctx.fillStyle = '#8B7355';
+            ctx.fillRect(0, gameHeight - 100, gameWidth, 100);
+            ctx.fillStyle = '#654321';
+            for(let i = 0; i < gameWidth; i += 40) {
+                ctx.fillRect(i, gameHeight - 100, 35, 5);
+            }
+        }
+
+        function spawnObject() {
+            const type = animals[Math.floor(Math.random() * animals.length)];
+            objects.push({
+                x: Math.random() * (gameWidth - 50),
+                y: -50,
+                width: 50,
+                height: 50,
+                speed: type.speed + Math.random() * 0.5,
+                type: type,
+                rotation: 0
             });
         }
 
-        // Update game
-        function update(timestamp) {
-            if (!gameRunning) return;
+        function drawPlayer() {
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 5;
+            ctx.font = 'bold 70px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🧑‍🌾', player.x + player.width/2, player.y + player.height/2 + 20);
+            ctx.shadowBlur = 0;
+        }
 
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function drawObjects() {
+            objects.forEach(obj => {
+                ctx.save();
+                ctx.translate(obj.x + obj.width/2, obj.y + obj.height/2);
+                ctx.rotate(obj.rotation);
 
-            // Move basket
-            if (basket.moveLeft && basket.x > 0) {
-                basket.x -= basket.speed;
+                ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                ctx.shadowBlur = 8;
+                ctx.font = 'bold 45px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(obj.type.emoji, 0, 0);
+
+                ctx.restore();
+                obj.rotation += 0.08;
+            });
+        }
+
+        function updateScore() {
+            document.getElementById('scoreText').textContent = score;
+        }
+
+        function updateLives() {
+            const hearts = ['❤️', '❤️', '❤️'];
+            document.getElementById('livesText').textContent = hearts.slice(0, lives).join('');
+        }
+
+        function showCombo() {
+            const comboEl = document.getElementById('combo');
+            comboEl.textContent = `${combo}x COMBO! 🔥`;
+            comboEl.style.opacity = '1';
+            setTimeout(() => {
+                comboEl.style.opacity = '0';
+            }, 1000);
+        }
+
+        function checkCollision(obj) {
+            return obj.x < player.x + player.width &&
+                   obj.x + obj.width > player.x &&
+                   obj.y < player.y + player.height &&
+                   obj.y + obj.height > player.y;
+        }
+
+        function gameLoop(timestamp) {
+            if (!gameActive) return;
+
+            ctx.clearRect(0, 0, gameWidth, gameHeight);
+
+            // Draw background elements
+            drawClouds();
+            drawGround();
+
+            // Spawn objects
+            if (timestamp - lastSpawn > 1100) {
+                spawnObject();
+                lastSpawn = timestamp;
             }
-            if (basket.moveRight && basket.x < canvas.width - basket.width) {
-                basket.x += basket.speed;
-            }
 
-            // Spawn falling objects
-            if (timestamp - lastObjectTime > objectSpawnInterval) {
-                fallingObjects.push(createFallingObject());
-                lastObjectTime = timestamp;
-            }
+            // Update objects
+            for (let i = objects.length - 1; i >= 0; i--) {
+                objects[i].y += objects[i].speed;
 
-            // Update falling objects
-            fallingObjects.forEach((obj, index) => {
-                obj.y += obj.speed;
+                // Check catch
+                if (checkCollision(objects[i])) {
+                    // Combo system
+                    if(timestamp - lastCatchTime < 1200) {
+                        combo++;
+                        if(combo > 1) showCombo();
+                    } else {
+                        combo = 1;
+                    }
+                    lastCatchTime = timestamp;
 
-                // Check collision with basket
-                if (obj.y + obj.height > basket.y &&
-                    obj.y < basket.y + basket.height &&
-                    obj.x + obj.width > basket.x &&
-                    obj.x < basket.x + basket.width) {
-                    score += obj.type.points;
-                    fallingObjects.splice(index, 1);
+                    let points = objects[i].type.points * Math.max(1, combo);
+                    score += points;
+                    animalsCaught[objects[i].type.name]++;
                     updateScore();
+                    objects.splice(i, 1);
+
+                    // Haptic feedback for iPhone
+                    if (navigator.vibrate) {
+                        navigator.vibrate(10);
+                    }
+                    continue;
                 }
 
-                // Remove if off screen (missed)
-                if (obj.y > canvas.height) {
+                // Check miss
+                if (objects[i].y > gameHeight - 100) {
                     lives--;
-                    fallingObjects.splice(index, 1);
-                    updateScore();
+                    combo = 0;
+                    updateLives();
+                    objects.splice(i, 1);
 
                     if (lives <= 0) {
                         endGame();
+                        return;
                     }
                 }
-            });
+            }
 
-            // Draw everything
-            drawBasket();
-            drawFallingObjects();
+            drawObjects();
+            drawPlayer();
 
-            // Continue game loop
-            animationId = requestAnimationFrame(update);
+            requestAnimationFrame(gameLoop);
         }
 
-        // Update score display
-        function updateScore() {
-            document.getElementById('score').textContent = `Score: ${score} | Lives: ${lives}`;
-        }
-
-        // End game
-        function endGame() {
-            gameRunning = false;
-            cancelAnimationFrame(animationId);
-            document.getElementById('finalScore').textContent = `Your Score: ${score}`;
-            document.getElementById('gameOver').style.display = 'block';
-        }
-
-        // Restart game
-        function restartGame() {
+        function startGame() {
+            overlay.classList.add('hidden');
+            gameActive = true;
             score = 0;
             lives = 3;
-            fallingObjects = [];
-            gameRunning = true;
-            basket.x = canvas.width / 2 - 40;
-            document.getElementById('gameOver').style.display = 'none';
+            objects = [];
+            combo = 0;
+            player.x = gameWidth / 2 - 50;
+            animalsCaught = { rabbit: 0, panda: 0, lion: 0, giraffe: 0, zebra: 0 };
             updateScore();
-            requestAnimationFrame(update);
+            updateLives();
+            lastSpawn = performance.now();
+            requestAnimationFrame(gameLoop);
         }
 
-        // Keyboard controls
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') basket.moveLeft = true;
-            if (e.key === 'ArrowRight') basket.moveRight = true;
-        });
+        function endGame() {
+            gameActive = false;
+            document.getElementById('finalScoreText').textContent = score;
 
-        document.addEventListener('keyup', (e) => {
-            if (e.key === 'ArrowLeft') basket.moveLeft = false;
-            if (e.key === 'ArrowRight') basket.moveRight = false;
-        });
+            let msg = '';
+            if (score < 150) msg = 'Good start! Keep practicing! 🌱';
+            else if (score < 400) msg = 'Great job, Keeper! 🎯';
+            else if (score < 700) msg = 'Excellent work! 🌟';
+            else msg = 'Master Zookeeper! 🏆';
 
-        // Touch controls for mobile
-        let touchX = null;
+            document.getElementById('message').textContent = msg;
+
+            const totalAnimals = Object.values(animalsCaught).reduce((a, b) => a + b, 0);
+            document.getElementById('animalsCaught').textContent = 
+                `You rescued ${totalAnimals} animals!`;
+
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        function restartGame() {
+            gameOverScreen.classList.add('hidden');
+            startGame();
+        }
+
+        // Button events
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', restartGame);
+
+        // Touch control optimized for iPhone
+        let touchStartX = null;
 
         canvas.addEventListener('touchstart', (e) => {
+            if (!gameActive) return;
             e.preventDefault();
-            touchX = e.touches[0].clientX;
-        });
+            touchStartX = e.touches[0].clientX;
+        }, { passive: false });
 
         canvas.addEventListener('touchmove', (e) => {
+            if (!gameActive) return;
             e.preventDefault();
-            if (touchX !== null) {
-                const newTouchX = e.touches[0].clientX;
-                const canvasRect = canvas.getBoundingClientRect();
-                basket.x = newTouchX - canvasRect.left - basket.width / 2;
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            player.x = (touch.clientX - rect.left) * (gameWidth / rect.width) - player.width / 2;
+            player.x = Math.max(0, Math.min(gameWidth - player.width, player.x));
+        }, { passive: false });
 
-                // Keep basket in bounds
-                if (basket.x < 0) basket.x = 0;
-                if (basket.x > canvas.width - basket.width) {
-                    basket.x = canvas.width - basket.width;
-                }
-                touchX = newTouchX;
-            }
-        });
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            touchStartX = null;
+        }, { passive: false });
 
-        canvas.addEventListener('touchend', () => {
-            touchX = null;
-        });
-
-        // Mouse controls for desktop
+        // Mouse control for desktop
         canvas.addEventListener('mousemove', (e) => {
-            const canvasRect = canvas.getBoundingClientRect();
-            basket.x = e.clientX - canvasRect.left - basket.width / 2;
+            if (!gameActive) return;
+            const rect = canvas.getBoundingClientRect();
+            player.x = (e.clientX - rect.left) * (gameWidth / rect.width) - player.width / 2;
+            player.x = Math.max(0, Math.min(gameWidth - player.width, player.x));
+        });
 
-            if (basket.x < 0) basket.x = 0;
-            if (basket.x > canvas.width - basket.width) {
-                basket.x = canvas.width - basket.width;
+        // Arrow keys for desktop
+        document.addEventListener('keydown', (e) => {
+            if (!gameActive) return;
+            if (e.key === 'ArrowLeft') {
+                player.x = Math.max(0, player.x - 20);
+            }
+            if (e.key === 'ArrowRight') {
+                player.x = Math.min(gameWidth - player.width, player.x + 20);
             }
         });
 
-        // Start game
-        requestAnimationFrame(update);
+        // Prevent scrolling on mobile
+        document.body.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
