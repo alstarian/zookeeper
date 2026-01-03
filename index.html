@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Zoo Keeper Pro</title>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800;900&display=swap');
 
@@ -243,6 +248,7 @@
             padding: 44px 36px;
             max-width: 90%;
             width: 370px;
+            margin: 0 auto;
             text-align: center;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7),
                         inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -567,12 +573,17 @@
         }
 
         .game-over-text {
-            font-size: 72px;
+            font-size: 64px;
             font-weight: 900;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             animation: slideDown 0.8s ease-out;
+            text-align: center;
+            padding: 0 20px;
+            width: 100%;
+            max-width: 90vw;
+            word-wrap: break-word;
         }
 
         @keyframes slideDown {
@@ -611,8 +622,120 @@
             letter-spacing: 1px;
         }
 
+        .leaderboard-list {
+            margin: 20px 0;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s;
+        }
+
+        .leaderboard-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
+        }
+
+        .leaderboard-item.top1 {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.05) 100%);
+            border-color: #FFD700;
+        }
+
+        .leaderboard-item.top2 {
+            background: linear-gradient(135deg, rgba(192, 192, 192, 0.2) 0%, rgba(192, 192, 192, 0.05) 100%);
+            border-color: #C0C0C0;
+        }
+
+        .leaderboard-item.top3 {
+            background: linear-gradient(135deg, rgba(205, 127, 50, 0.2) 0%, rgba(205, 127, 50, 0.05) 100%);
+            border-color: #CD7F32;
+        }
+
+        .leaderboard-rank {
+            font-size: 20px;
+            font-weight: 800;
+            min-width: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .top1 .leaderboard-rank { 
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .leaderboard-name {
+            flex: 1;
+            font-size: 16px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0 12px;
+        }
+
+        .leaderboard-score {
+            font-size: 18px;
+            font-weight: 800;
+            color: #FFD700;
+        }
+
+        .name-input {
+            width: 100%;
+            padding: 16px;
+            margin: 16px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .name-input:focus {
+            outline: none;
+            border-color: rgba(102, 126, 234, 0.8);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .name-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .loading {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            margin: 20px 0;
+        }
+
         .hidden {
             display: none !important;
+        }
+
+        .firebase-status {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 10px;
+        }
+
+        .firebase-status.connected {
+            color: #4ade80;
+        }
+
+        .firebase-status.error {
+            color: #f87171;
         }
     </style>
 </head>
@@ -730,8 +853,10 @@
             </div>
 
             <p class="instruction" id="highScoreText">High Score: 0</p>
+            <p class="firebase-status" id="firebaseStatus">Connecting to leaderboard...</p>
             <button id="startBtn">Start Playing</button>
             <button class="secondary" id="statsBtn">View Stats 📊</button>
+            <button class="secondary" id="leaderboardBtn">🏆 Leaderboard</button>
         </div>
     </div>
 
@@ -748,6 +873,10 @@
                 <p class="stats" id="diffStats">Reached Level: 1</p>
                 <p class="stats" id="powerupStats">6️⃣7️⃣ Caught: 0</p>
                 <p class="stats" id="almostMsg" style="color: #FFD700;"></p>
+
+                <input type="text" id="playerNameInput" class="name-input" placeholder="Enter your name" maxlength="20" />
+                <button id="submitScoreBtn">🏆 Submit to Leaderboard</button>
+
                 <button id="restartBtn">Play Again 🎮</button>
                 <button class="secondary" id="viewStatsBtn">View Full Stats 📊</button>
             </div>
@@ -795,6 +924,21 @@
         </div>
     </div>
 
+    <div id="leaderboardScreen" class="hidden">
+        <div id="overlay">
+            <div class="modal">
+                <h2>🏆 Global Leaderboard</h2>
+                <p class="subtitle">Top Players Worldwide</p>
+
+                <div id="leaderboardList" class="leaderboard-list">
+                    <p class="loading">Loading leaderboard...</p>
+                </div>
+
+                <button id="closeLeaderboardBtn">Back to Menu</button>
+            </div>
+        </div>
+    </div>
+
     <div id="achievementPopup" class="achievement">
         <div class="achievement-icon" id="achIcon">🏆</div>
         <div class="achievement-content">
@@ -804,6 +948,126 @@
     </div>
 
     <script>
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY_HERE",
+            authDomain: "your-app.firebaseapp.com",
+            databaseURL: "https://your-app-default-rtdb.firebaseio.com",
+            projectId: "your-app",
+            storageBucket: "your-app.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+
+        let database;
+        let firebaseInitialized = false;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            firebaseInitialized = true;
+            document.getElementById('firebaseStatus').textContent = '✓ Connected to leaderboard';
+            document.getElementById('firebaseStatus').classList.add('connected');
+        } catch (error) {
+            console.error('Firebase initialization failed:', error);
+            document.getElementById('firebaseStatus').textContent = '⚠ Leaderboard offline (configure Firebase)';
+            document.getElementById('firebaseStatus').classList.add('error');
+        }
+
+        function submitScoreToLeaderboard(playerName, score) {
+            if (!firebaseInitialized) {
+                alert('Leaderboard is offline. Configure Firebase to enable.');
+                return;
+            }
+
+            if (!playerName || playerName.trim() === '') {
+                alert('Please enter your name!');
+                return;
+            }
+
+            playerName = playerName.trim().substring(0, 20);
+
+            database.ref('leaderboard').push({
+                name: playerName,
+                score: score,
+                timestamp: Date.now(),
+                hash: btoa(score + '' + Date.now() + 'zookeeper2026')
+            }).then(() => {
+                showAchievement('🎯', 'Score Submitted!', `You're on the leaderboard!`);
+                localStorage.setItem('playerName', playerName);
+            }).catch(error => {
+                console.error('Error submitting score:', error);
+                alert('Failed to submit score. Please try again.');
+            });
+        }
+
+        function loadLeaderboard() {
+            if (!firebaseInitialized) {
+                document.getElementById('leaderboardList').innerHTML = 
+                    '<p class="loading">Leaderboard offline. Configure Firebase in the code.</p>';
+                return;
+            }
+
+            document.getElementById('leaderboardList').innerHTML = '<p class="loading">Loading...</p>';
+
+            database.ref('leaderboard')
+                .orderByChild('score')
+                .limitToLast(50)
+                .once('value')
+                .then(snapshot => {
+                    const scores = [];
+                    snapshot.forEach(child => {
+                        scores.push(child.val());
+                    });
+
+                    scores.reverse();
+
+                    if (scores.length === 0) {
+                        document.getElementById('leaderboardList').innerHTML = 
+                            '<p class="loading">No scores yet. Be the first!</p>';
+                        return;
+                    }
+
+                    let html = '';
+                    scores.forEach((entry, index) => {
+                        const rank = index + 1;
+                        let rankClass = '';
+                        let rankEmoji = '';
+
+                        if (rank === 1) {
+                            rankClass = 'top1';
+                            rankEmoji = '🥇';
+                        } else if (rank === 2) {
+                            rankClass = 'top2';
+                            rankEmoji = '🥈';
+                        } else if (rank === 3) {
+                            rankClass = 'top3';
+                            rankEmoji = '🥉';
+                        }
+
+                        html += `
+                            <div class="leaderboard-item ${rankClass}">
+                                <div class="leaderboard-rank">${rankEmoji || '#' + rank}</div>
+                                <div class="leaderboard-name">${escapeHtml(entry.name)}</div>
+                                <div class="leaderboard-score">${entry.score}</div>
+                            </div>
+                        `;
+                    });
+
+                    document.getElementById('leaderboardList').innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error loading leaderboard:', error);
+                    document.getElementById('leaderboardList').innerHTML = 
+                        '<p class="loading">Error loading leaderboard.</p>';
+                });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         let highScore = parseInt(localStorage.getItem('zooKeeperHighScore') || 0);
         let bestStreak = parseInt(localStorage.getItem('bestStreak') || 0);
         let totalPlays = parseInt(localStorage.getItem('totalPlays') || 0);
@@ -813,6 +1077,14 @@
         let highestLevelReached = parseInt(localStorage.getItem('highestLevelReached') || 1);
         let animalCounts = JSON.parse(localStorage.getItem('animalCounts') || '{}');
         let achievements = JSON.parse(localStorage.getItem('achievements') || '{}');
+
+        function updateMainMenuHighScore() {
+            const currentHighScore = parseInt(localStorage.getItem('zooKeeperHighScore') || 0);
+            highScore = currentHighScore;
+            document.getElementById('highScoreText').textContent = `High Score: ${currentHighScore}`;
+        }
+
+        updateMainMenuHighScore();
 
         let audioCtx = null;
         let audioInitialized = false;
@@ -956,10 +1228,12 @@
             document.getElementById('overlay').classList.add('hidden');
             document.getElementById('statsScreen').classList.remove('hidden');
 
+            const currentHighScore = parseInt(localStorage.getItem('zooKeeperHighScore') || 0);
+
             document.getElementById('totalGames').textContent = totalPlays;
             document.getElementById('totalAnimals').textContent = totalAnimalsCaught;
             document.getElementById('totalPoints').textContent = totalPointsEarned.toLocaleString();
-            document.getElementById('bestScore').textContent = highScore;
+            document.getElementById('bestScore').textContent = currentHighScore;
             document.getElementById('longestStreak').textContent = bestStreak;
             document.getElementById('totalPowerups').textContent = totalPowerupsCaught;
             document.getElementById('highestLevel').textContent = highestLevelReached;
@@ -1264,15 +1538,16 @@
         }
 
         function updateStreak() {
-            document.getElementById('streakCount').textContent = `${streak}/10`;
-            const progress = (streak % 10) * 10;
+            if(streak > maxStreak) maxStreak = streak;
+
+            const displayStreak = streak % 10;
+            document.getElementById('streakCount').textContent = `${displayStreak}/10`;
+            const progress = displayStreak * 10;
             document.getElementById('progressFill').style.width = progress + '%';
 
             const bar = document.getElementById('streakBar');
-            if(streak >= 7) bar.classList.add('hot');
+            if(displayStreak >= 7) bar.classList.add('hot');
             else bar.classList.remove('hot');
-
-            if(streak > maxStreak) maxStreak = streak;
 
             if(streak > 0 && streak % 10 === 0) {
                 if(lives < 5) {
@@ -1462,6 +1737,7 @@
 
             document.getElementById('overlay').classList.add('hidden');
             document.getElementById('statsScreen').classList.add('hidden');
+            document.getElementById('leaderboardScreen').classList.add('hidden');
             gameRunning = true;
             score = 0;
             lives = 3;
@@ -1523,6 +1799,9 @@
                 document.getElementById('diffStats').textContent = `Reached Level: ${maxDifficulty}`;
                 document.getElementById('powerupStats').textContent = `6️⃣7️⃣ Caught: ${powerupsCaught}`;
 
+                const savedName = localStorage.getItem('playerName') || '';
+                document.getElementById('playerNameInput').value = savedName;
+
                 const newHigh = score > highScore;
                 if(newHigh) {
                     highScore = score;
@@ -1531,6 +1810,7 @@
                     document.getElementById('gameOverTitle').textContent = '🏆 NEW RECORD! 🏆';
                     achievementSound();
                     setTimeout(bigWinSound, 500);
+                    updateMainMenuHighScore();
                 } else {
                     document.getElementById('newHighScore').classList.add('hidden');
                     document.getElementById('gameOverTitle').textContent = 'Amazing Run!';
@@ -1553,6 +1833,8 @@
 
                     if(diff < 100) {
                         document.getElementById('almostMsg').textContent = `Almost there! Keep going! 🎯`;
+                    } else {
+                        document.getElementById('almostMsg').textContent = '';
                     }
                 }
 
@@ -1587,9 +1869,24 @@
         document.getElementById('closeStatsBtn').addEventListener('click', () => {
             document.getElementById('statsScreen').classList.add('hidden');
             document.getElementById('overlay').classList.remove('hidden');
+            updateMainMenuHighScore();
         });
 
-        document.getElementById('highScoreText').textContent = `High Score: ${highScore}`;
+        document.getElementById('leaderboardBtn').addEventListener('click', () => {
+            document.getElementById('overlay').classList.add('hidden');
+            document.getElementById('leaderboardScreen').classList.remove('hidden');
+            loadLeaderboard();
+        });
+
+        document.getElementById('closeLeaderboardBtn').addEventListener('click', () => {
+            document.getElementById('leaderboardScreen').classList.add('hidden');
+            document.getElementById('overlay').classList.remove('hidden');
+        });
+
+        document.getElementById('submitScoreBtn').addEventListener('click', () => {
+            const playerName = document.getElementById('playerNameInput').value;
+            submitScoreToLeaderboard(playerName, score);
+        });
 
         canvas.addEventListener('touchmove', (e) => {
             if (!gameRunning) return;
