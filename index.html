@@ -1354,7 +1354,7 @@
 
         function activateSlowMo() {
             slowMoActive = true;
-            slowMoEndTime = performance.now() + 3000;
+            slowMoEndTime = performance.now() + 2500;
             document.getElementById('slowmoOverlay').classList.add('active');
             powerupSound();
             showAchievement('⏱️', 'SLOW MOTION!', '3 seconds activated!');
