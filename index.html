@@ -1354,10 +1354,10 @@
 
         function activateSlowMo() {
             slowMoActive = true;
-            slowMoEndTime = performance.now() + 2000;
+            slowMoEndTime = performance.now() + 3000;
             document.getElementById('slowmoOverlay').classList.add('active');
             powerupSound();
-            showAchievement('⏱️', 'SLOW MOTION!', '2 seconds activated!');
+            showAchievement('⏱️', 'SLOW MOTION!', '3 seconds activated!');
             showBigWin('SLOW-MO! ⏱️');
             createParticles(player.x + 40, player.y + 40, '#00FFFF', 50);
         }
