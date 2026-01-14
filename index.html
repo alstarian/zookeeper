@@ -796,6 +796,41 @@
 
 
 
+
+.pause-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 50px;
+    height: 50px;
+    border: none;
+    background: rgba(15, 20, 35, 0.9);
+    border: 2px solid rgba(102, 126, 234, 0.5);
+    border-radius: 50%;
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    cursor: pointer;
+    z-index: 101;
+    transition: all 0.2s;
+}
+
+.pause-btn:hover, .pause-btn:active {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 1);
+    transform: scale(1.05);
+}
+
+.pause-btn.paused {
+    background: rgba(255, 107, 107, 0.3);
+    border-color: #FF6B6B;
+}
+
+
+
+
         
     </style>
 </head>
@@ -814,6 +849,7 @@
                     <div class="heart"></div>
                     <div class="heart"></div>
                     <div class="heart"></div>
+                    <button id="pauseBtn" class="pause-btn">⏸️</button>
                 </div>
             </div>
         </div>
@@ -1007,6 +1043,26 @@
         </div>
     </div>
 
+
+
+
+<!-- PAUSE OVERLAY -->
+<div id="pauseOverlay" class="hidden">
+    <div id="overlay">
+        <div class="modal">
+            <h2>⏸️ PAUSED</h2>
+            <p class="subtitle">Game is paused</p>
+            <button id="resumeBtn">Resume ▶️</button>
+            <button class="secondary" id="restartPauseBtn">Restart</button>
+            <button class="secondary" id="menuBtn">Main Menu</button>
+        </div>
+    </div>
+</div>
+
+
+
+
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDWLgSdmM1E3Mq0_oVQK3H6UfvJWv0A8HM",
@@ -1020,6 +1076,9 @@
 
         let database;
         let firebaseInitialized = false;
+        let gamePaused = false;
+        let pauseOverlay = document.getElementById('pauseOverlay');
+
 
         try {
             firebase.initializeApp(firebaseConfig);
@@ -1242,6 +1301,34 @@
                 setTimeout(() => beep(523 + (i * 100), 0.1), i * 80);
             }
         }
+
+
+
+
+        function togglePause() {
+    if (!gameRunning) return; // Can't pause if game not running
+    
+    gamePaused = !gamePaused;
+    
+    if (gamePaused) {
+        gameRunning = false; // Stop game loop
+        document.getElementById('pauseBtn').textContent = '▶️';
+        document.getElementById('pauseBtn').classList.add('paused');
+        pauseOverlay.classList.remove('hidden');
+        if (audioCtx) audioCtx.suspend(); // Pause audio
+    } else {
+        gameRunning = true;
+        document.getElementById('pauseBtn').textContent = '⏸️';
+        document.getElementById('pauseBtn').classList.remove('paused');
+        pauseOverlay.classList.add('hidden');
+        if (audioCtx) audioCtx.resume(); // Resume audio
+        requestAnimationFrame(gameLoop); // Restart game loop
+    }
+}
+
+
+
+
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d', { alpha: false });
@@ -1996,6 +2083,30 @@
             if (e.key === 'ArrowLeft') player.x = Math.max(0, player.x - 22);
             if (e.key === 'ArrowRight') player.x = Math.min(gameWidth - 80, player.x + 22);
         });
+
+
+        document.getElementById('pauseBtn').addEventListener('click', togglePause);
+document.getElementById('resumeBtn').addEventListener('click', togglePause);
+document.getElementById('restartPauseBtn').addEventListener('click', () => {
+    togglePause(); // Close pause
+    endGame();
+    restart(); // Restart game
+});
+document.getElementById('menuBtn').addEventListener('click', () => {
+    togglePause(); // Close pause
+    endGame(); // End current game
+});
+
+
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && gameRunning && !gamePaused) {
+        togglePause();
+    }
+});
+
+
+
     </script>
 </body>
 </html>
