@@ -753,41 +753,53 @@
 
 
 
-/* Portrait-only lock - MOBILE ONLY */
-@media (orientation: landscape) and (max-width: 768px) {
-    body::before {
-        content: "📱 Please rotate your device";
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: #0a0e1a;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        font-weight: 700;
-        font-family: 'Inter', sans-serif;
-        z-index: 10000;
-        text-align: center;
-        padding: 20px;
-        flex-direction: column;
-        gap: 20px;
-    }
-    
-    body::after {
-        content: "🔄";
-        font-size: 80px;
-        position: fixed;
-        top: 35%;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 10001;
-        animation: rotateIcon 2s infinite;
-    }
+/* Portrait lock - FIXED removal */
+body.force-portrait::before {
+    content: "📱 Please rotate your device";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0a0e1a;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    z-index: 10000;
+    text-align: center;
+    padding: 20px;
+    flex-direction: column;
+    gap: 20px;
 }
+
+body.force-portrait::after {
+    content: "🔄";
+    font-size: 80px;
+    position: fixed;
+    top: 35%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10001;
+    animation: rotateIcon 2s infinite;
+}
+
+/* FORCE HIDE when NOT in landscape */
+body:not(.force-portrait)::before,
+body:not(.force-portrait)::after {
+    display: none !important;
+    content: none !important;
+}
+
+@keyframes rotateIcon {
+    0%, 100% { transform: translateX(-50%) rotate(0deg); }
+    50% { transform: translateX(-50%) rotate(90deg); }
+}
+
+
 
 @keyframes rotateIcon {
     0%, 100% { transform: translateX(-50%) rotate(0deg); }
@@ -1946,6 +1958,43 @@
             document.getElementById('gameOverScreen').classList.add('hidden');
             startGame();
         }
+
+
+// ... all your existing functions: startGame, endGame, etc.
+
+/* === ORIENTATION HANDLER (ADD HERE, ABOVE EVENT LISTENERS) === */
+let isMobile = /iPhone|iPad|iPod/.test(navigator.userAgent);
+let isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+function checkOrientation() {
+    const isLandscape = window.innerWidth > window.innerHeight;
+    
+    if (isMobile && isLandscape) {
+        document.body.classList.add('force-portrait');
+    } else {
+        document.body.classList.remove('force-portrait');
+    }
+    
+    void document.body.offsetHeight; // reflow
+}
+
+window.addEventListener('orientationchange', () => {
+    setTimeout(checkOrientation, 150);
+});
+
+window.addEventListener('resize', checkOrientation);
+
+checkOrientation();
+/* === END ORIENTATION HANDLER === */
+
+/* Existing event listeners (already in your code) */
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('restartBtn').addEventListener('click', restart);
+// ... rest of listeners
+
+        
+
+        
 
         document.getElementById('startBtn').addEventListener('click', startGame);
         document.getElementById('restartBtn').addEventListener('click', restart);
