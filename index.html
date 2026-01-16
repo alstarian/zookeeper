@@ -1276,14 +1276,16 @@ const achievementsList = {
 };
 
 // Zone themes
+c// Zone themes  
 const zones = [
-    { name: 'Training Grounds', levels: [1, 2, 3, 4], background: 'linear-gradient(180deg, #0f1729 0%, #1a2332 40%, #2d3748 100%)', color: '#667eea' },
-    { name: 'Jungle Paradise 🌴', levels: [5, 6, 7, 8, 9], background: 'linear-gradient(180deg, #1a4d2e 0%, #2d5a3d 40%, #4f7942 100%)', color: '#4ade80' },
-    { name: 'Arctic Tundra ❄️', levels: [10, 11, 12, 13, 14], background: 'linear-gradient(180deg, #1e3a5f 0%, #2e5984 40%, #87ceeb 100%)', color: '#4ECDC4' },
-    { name: 'Savanna Sunset 🦁', levels: [15, 16, 17, 18, 19], background: 'linear-gradient(180deg, #8B4513 0%, #CD853F 40%, #DAA520 100%)', color: '#FFA500' },
-    { name: 'Mystic Forest 🌙', levels: [20, 21, 22, 23, 24], background: 'linear-gradient(180deg, #2C1654 0%, #4A235A 40%, #6C3483 100%)', color: '#9B59B6' },
-    { name: 'Volcanic Valley 🌋', levels: [25, 26, 27, 28, 29], background: 'linear-gradient(180deg, #4A0E0E 0%, #7D2020 40%, #B22222 100%)', color: '#FF6B6B' }
+    { name: 'Training Grounds', levels: [1, 2, 3, 4, 5, 6, 7, 8, 9], background: 'linear-gradient(180deg, #0f1729 0%, #1a2332 40%, #2d3748 100%)', color: '#667eea' },
+    { name: 'Jungle Paradise 🌴', levels: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19], background: 'linear-gradient(180deg, #1a4d2e 0%, #2d5a3d 40%, #4f7942 100%)', color: '#4ade80' },
+    { name: 'Arctic Tundra ❄️', levels: [20, 21, 22, 23, 24, 25, 26, 27, 28, 29], background: 'linear-gradient(180deg, #1e3a5f 0%, #2e5984 40%, #87ceeb 100%)', color: '#4ECDC4' },
+    { name: 'Savanna Sunset 🦁', levels: [30, 31, 32, 33, 34, 35, 36, 37, 38, 39], background: 'linear-gradient(180deg, #8B4513 0%, #CD853F 40%, #DAA520 100%)', color: '#FFA500' },
+    { name: 'Mystic Forest 🌙', levels: [40, 41, 42, 43, 44, 45, 46, 47, 48, 49], background: 'linear-gradient(180deg, #2C1654 0%, #4A235A 40%, #6C3483 100%)', color: '#9B59B6' },
+    { name: 'Volcanic Valley 🌋', levels: [50, 51, 52, 53, 54, 55, 56, 57, 58, 59], background: 'linear-gradient(180deg, #4A0E0E 0%, #7D2020 40%, #B22222 100%)', color: '#FF6B6B' }
 ];
+
 
 // Confetti celebration
 function throwConfetti(count = 50) {
@@ -1388,27 +1390,32 @@ function updateZoneTheme(level) {
 function showZoneTransition(zoneName) {
     const popup = document.createElement('div');
     popup.style.cssText = `
-        position: fixed; top: 50%; left: 50%;
-        transform: translate(-50%, -50%) scale(0);
-        background: rgba(20, 25, 40, 0.98);
-        border: 3px solid #FFD700;
-        border-radius: 20px;
-        padding: 30px 50px;
-        z-index: 6000;
+        position: fixed;
+        top: 200px;
+        left: 50%;
+        transform: translate(-50%, -100px);
+        background: rgba(20, 25, 40, 0.95);
+        border: 2px solid #FFD700;
+        border-radius: 12px;
+        padding: 8px 20px;
+        z-index: 150;
         text-align: center;
-        box-shadow: 0 0 50px rgba(255, 215, 0, 0.8);
-        animation: zonePopup 3s ease-out forwards;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        animation: zoneSlideIn 2.5s ease-out forwards;
     `;
     
     popup.innerHTML = `
-        <div style="font-size: 18px; color: rgba(255,255,255,0.7); margin-bottom: 10px; font-weight: 700;">ENTERING</div>
-        <div style="font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        <div style="font-size: 9px; color: rgba(255,255,255,0.5); margin-bottom: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Entering</div>
+        <div style="font-size: 14px; font-weight: 800; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
                     -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${zoneName}</div>
     `;
     
     document.body.appendChild(popup);
-    setTimeout(() => popup.remove(), 3000);
+    setTimeout(() => popup.remove(), 2500);
 }
+
 
 // Combo voice messages
 function playComboSound(comboLevel) {
@@ -1430,7 +1437,9 @@ function playComboSound(comboLevel) {
         }
     }
     
-    
+    beep(message.freq, 100);
+    setTimeout(() => beep(message.freq * 1.2, 100), 100);
+    setTimeout(() => beep(message.freq * 1.5, 150), 200);
     
     showComboMessage(message.text);
 }
@@ -2044,7 +2053,7 @@ function resetGameTracker() {
                     // NEW: Update zone theme when level changes
                     updateZoneTheme(difficulty);
                     
-                    
+                    // levelUpSound();
                     showAchievement('⬆️', 'Level Up!', `Level ${difficulty}`);
                     checkAchievements();
                     
