@@ -1388,27 +1388,32 @@ function updateZoneTheme(level) {
 function showZoneTransition(zoneName) {
     const popup = document.createElement('div');
     popup.style.cssText = `
-        position: fixed; top: 50%; left: 50%;
-        transform: translate(-50%, -50%) scale(0);
-        background: rgba(20, 25, 40, 0.98);
-        border: 3px solid #FFD700;
-        border-radius: 20px;
-        padding: 30px 50px;
-        z-index: 6000;
+        position: fixed;
+        top: 200px;
+        left: 50%;
+        transform: translate(-50%, -100px);
+        background: rgba(20, 25, 40, 0.95);
+        border: 2px solid #FFD700;
+        border-radius: 12px;
+        padding: 8px 20px;
+        z-index: 150;
         text-align: center;
-        box-shadow: 0 0 50px rgba(255, 215, 0, 0.8);
-        animation: zonePopup 3s ease-out forwards;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        animation: zoneSlideIn 2.5s ease-out forwards;
     `;
     
     popup.innerHTML = `
-        <div style="font-size: 18px; color: rgba(255,255,255,0.7); margin-bottom: 10px; font-weight: 700;">ENTERING</div>
-        <div style="font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        <div style="font-size: 9px; color: rgba(255,255,255,0.5); margin-bottom: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Entering</div>
+        <div style="font-size: 14px; font-weight: 800; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
                     -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${zoneName}</div>
     `;
     
     document.body.appendChild(popup);
-    setTimeout(() => popup.remove(), 3000);
+    setTimeout(() => popup.remove(), 2500);
 }
+
 
 // Combo voice messages
 function playComboSound(comboLevel) {
@@ -1430,7 +1435,9 @@ function playComboSound(comboLevel) {
         }
     }
     
-    
+    beep(message.freq, 100);
+    setTimeout(() => beep(message.freq * 1.2, 100), 100);
+    setTimeout(() => beep(message.freq * 1.5, 150), 200);
     
     showComboMessage(message.text);
 }
@@ -2044,7 +2051,7 @@ function resetGameTracker() {
                     // NEW: Update zone theme when level changes
                     updateZoneTheme(difficulty);
                     
-                    
+                    levelUpSound();
                     showAchievement('⬆️', 'Level Up!', `Level ${difficulty}`);
                     checkAchievements();
                     
