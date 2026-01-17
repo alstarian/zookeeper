@@ -25,6 +25,69 @@
     <style>
 
 
+                                        #hud {
+                    position: absolute;
+                    top: 5px;  /* More aggressive - was 15px */
+                    left: 0;
+                    right: 0;
+                    padding: 0 15px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    z-index: 100;
+                }
+
+
+
+                        /* Pause button - top-right, matches your HUD style */
+            /* Pause button - centered between score and lives */
+          
+
+
+#pauseButton {
+    position: absolute;
+    top: calc(10px + env(safe-area-inset-top)); /* Much closer - was 30px */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48px;
+    height: 48px;
+    background: rgba(15, 20, 35, 0.9);
+    border: 1px solid rgba(102, 126, 234, 0.25);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    z-index: 150;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+#pauseButton:active {
+    transform: translateX(-50%) scale(0.92);
+}
+          
+
+            /* Pause overlay - reuses your existing modal styling */
+            #pauseOverlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(10, 14, 26, 0.97);
+                backdrop-filter: blur(20px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+            }
+
+
+
 
                             html, body {
                 width: 100%;
@@ -104,6 +167,7 @@
             padding: 0;
             background: radial-gradient(ellipse at top, #1a1f35 0%, #0a0e1a 100%);
             overflow: hidden;    /* Prevents any scroll/overflow issues */
+
         }
         canvas {
             display: block;
@@ -331,9 +395,18 @@
 
 /* Optional: Add safe area padding for iPhone notch */
 @supports (padding: env(safe-area-inset-top)) {
-    .modal {
-        padding-top: calc(60px + env(safe-area-inset-top));
-        padding-bottom: calc(44px + env(safe-area-inset-bottom));
+    #hud {
+        top: calc(5px + env(safe-area-inset-top)); /* Very tight spacing */
+        padding: 0 15px;
+    }
+    #streakBar {
+        top: calc(80px + env(safe-area-inset-top)); /* Moved up */
+    }
+    #difficultyIndicator {
+        top: calc(155px + env(safe-area-inset-top)); /* Moved up */
+    }
+    #combo {
+        top: calc(215px + env(safe-area-inset-top)); /* Moved up */
     }
 }
 
@@ -498,6 +571,7 @@
             margin-bottom: 8px;
             font-weight: 600;
         }
+
 
         .highscore-beat {
             font-size: 18px;
@@ -1049,6 +1123,24 @@
         <div id="combo"></div>
 
         <canvas id="gameCanvas"></canvas>
+
+
+
+                <div id="pauseButton">⏸️</div>
+
+        <!-- Full-screen pause overlay (add this after #gameContainer or at the end of body) -->
+        <div id="pauseOverlay" class="hidden">
+            <div class="modal">
+                <h2>⏸️ Game Paused</h2>
+                <p class="subtitle">Take a break! Tap Resume to continue playing.</p>
+                <button id="resumeButton">Resume Game</button>
+                <button class="secondary" id="quitButton">Quit to Menu</button>
+            </div>
+        </div>
+
+
+
+
     </div>
 
     <div class="slowmo-overlay" id="slowmoOverlay"></div>
@@ -1764,6 +1856,16 @@ function resetGameTracker() {
         let slowMoActive = false;
         let slowMoEndTime = 0;
         let powerupsCaught = 0;
+        let paused = false;           // Tracks if game is paused
+        let animationFrameId = null;  // Stores the requestAnimationFrame ID for canceling
+
+
+
+
+
+
+
+
 
         for(let i = 0; i < 100; i++) {
             stars.push({
@@ -2196,50 +2298,67 @@ function resetGameTracker() {
 
             drawStars();
             drawGround();
+            drawAnimals();         // Shows animals exactly where they stopped
+            updateParticles();     // Lets particles fade nicely (optional — remove if you want total freeze)
+            drawPlayer();
 
-            const baseSpawn = 1300;
-            const reductionPerLevel = 25;
-            const minSpawn = 700;
-            const spawnInterval = Math.max(minSpawn, baseSpawn - (difficulty * reductionPerLevel));
 
-            if (time - lastSpawn > spawnInterval) {
-                spawn();
-                lastSpawn = time;
+                        // === IF PAUSED: STOP HERE (freeze everything) ===
+                       if (paused) {
+                drawAnimals();
+                updateParticles();
+                drawPlayer();
+                animationFrameId = requestAnimationFrame(gameLoop);  // <-- Add this here too
+                return;
             }
 
-            const powerupInterval = 15000 + Math.random() * 15000;
-            if(time - lastPowerupSpawn > powerupInterval) {
-                spawnPowerup();
-                lastPowerupSpawn = time;
-            }
 
-            if(slowMoActive) {
-                animals.forEach(a => {
-                    if(a.speed > a.type.baseSpeed * 0.3) {
-                        a.speed = a.type.baseSpeed * 0.3;
-                        a.swerveSpeed = a.swerveSpeed * 0.3;
-                    }
-                });
-                powerupNumbers.forEach(p => {
-                    if(p.speed > p.type.baseSpeed * 0.3) {
-                        p.speed = p.type.baseSpeed * 0.3;
-                    }
-                });
-            } else {
-                animals.forEach(a => {
-                    const targetSpeed = a.type.baseSpeed * Math.min(1 + (difficulty * 0.06), 1.8);
-                    if(a.speed < targetSpeed) {
-                        a.speed = targetSpeed;
-                        a.swerveSpeed = (0.02 + (Math.random() * 0.01)) * Math.min(1 + (difficulty * 0.05), 1.5);
-                    }
-                });
-                powerupNumbers.forEach(p => {
-                    const targetSpeed = p.type.baseSpeed * Math.min(1 + (difficulty * 0.06), 1.8);
-                    if(p.speed < targetSpeed) {
-                        p.speed = targetSpeed;
-                    }
-                });
-            }
+
+                        // === ACTIVE GAME LOGIC (ONLY RUNS WHEN NOT PAUSED) ===
+                // Paste ALL your original update code here (exactly as it was)
+                checkSlowMo(time);
+
+
+                        const baseSpawn = 1300;
+                const reductionPerLevel = 25;
+                const minSpawn = 700;
+                const spawnInterval = Math.max(minSpawn, baseSpawn - (difficulty * reductionPerLevel));
+                if (time - lastSpawn > spawnInterval) {
+                    spawn();
+                    lastSpawn = time;
+                }
+                const powerupInterval = 15000 + Math.random() * 15000;
+                if(time - lastPowerupSpawn > powerupInterval) {
+                    spawnPowerup();
+                    lastPowerupSpawn = time;
+                }
+                if(slowMoActive) {
+                    animals.forEach(a => {
+                        if(a.speed > a.type.baseSpeed * 0.3) {
+                            a.speed = a.type.baseSpeed * 0.3;
+                            a.swerveSpeed = a.swerveSpeed * 0.3;
+                        }
+                    });
+                    powerupNumbers.forEach(p => {
+                        if(p.speed > p.type.baseSpeed * 0.3) {
+                            p.speed = p.type.baseSpeed * 0.3;
+                        }
+                    });
+                } else {
+                    animals.forEach(a => {
+                        const targetSpeed = a.type.baseSpeed * Math.min(1 + (difficulty * 0.06), 1.8);
+                        if(a.speed < targetSpeed) {
+                            a.speed = targetSpeed;
+                            a.swerveSpeed = (0.02 + (Math.random() * 0.01)) * Math.min(1 + (difficulty * 0.05), 1.5);
+                        }
+                    });
+                    powerupNumbers.forEach(p => {
+                        const targetSpeed = p.type.baseSpeed * Math.min(1 + (difficulty * 0.06), 1.8);
+                        if(p.speed < targetSpeed) {
+                            p.speed = targetSpeed;
+                        }
+                    });
+                }
 
             for(let i = powerupNumbers.length - 1; i >= 0; i--) {
                 powerupNumbers[i].y += powerupNumbers[i].speed;
@@ -2340,7 +2459,7 @@ function resetGameTracker() {
             drawAnimals();
             updateParticles();
             drawPlayer();
-            requestAnimationFrame(gameLoop);
+            animationFrameId = requestAnimationFrame(gameLoop);
         }
 
         function startGame() {
@@ -2377,6 +2496,7 @@ function resetGameTracker() {
             updateDifficultyDisplay();
             lastSpawn = performance.now();
             lastPowerupSpawn = performance.now() + 10000;
+            document.getElementById('pauseButton').style.display = 'flex';
             requestAnimationFrame(gameLoop);
         }
 
@@ -2384,6 +2504,7 @@ function resetGameTracker() {
             gameRunning = false;
             slowMoActive = false;
             document.getElementById('slowmoOverlay').classList.remove('active');
+            document.getElementById('pauseButton').style.display = 'none';
 
             const gameOverAnim = document.createElement('div');
             gameOverAnim.className = 'game-over-animation';
@@ -2530,6 +2651,73 @@ function resetGameTracker() {
             if (e.key === 'ArrowLeft') player.x = Math.max(0, player.x - 22);
             if (e.key === 'ArrowRight') player.x = Math.min(gameWidth - 80, player.x + 22);
         });
+
+
+
+        // Pause button functionality
+document.getElementById('pauseButton').addEventListener('click', () => {
+    if (!gameRunning) return; // Don't allow pausing if game isn't running
+    
+    paused = true;
+    document.getElementById('pauseOverlay').classList.remove('hidden');
+    document.getElementById('pauseButton').style.display = 'none'; // Hide pause button when paused
+});
+
+// Resume button
+document.getElementById('resumeButton').addEventListener('click', () => {
+    paused = false;
+    document.getElementById('pauseOverlay').classList.add('hidden');
+    document.getElementById('pauseButton').style.display = 'flex'; // Show pause button again
+    
+    // Resume the game loop
+    if (gameRunning && !animationFrameId) {
+        requestAnimationFrame(gameLoop);
+    }
+});
+
+// Quit button (returns to main menu)
+document.getElementById('quitButton').addEventListener('click', () => {
+    paused = false;
+    gameRunning = false;
+    document.getElementById('pauseOverlay').classList.add('hidden');
+    document.getElementById('pauseButton').style.display = 'flex';
+    document.getElementById('overlay').classList.remove('hidden');
+    
+    // Cancel any ongoing animation frame
+    if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
+});
+
+
+// Auto-pause when user switches apps, gets a call, or minimizes browser
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden && gameRunning && !paused) {
+        // Page is hidden (phone call, app switch, etc.) - auto pause
+        paused = true;
+        document.getElementById('pauseOverlay').classList.remove('hidden');
+        document.getElementById('pauseButton').style.display = 'none';
+    }
+});
+
+// Also handle when window loses focus (additional safety net)
+window.addEventListener('blur', () => {
+    if (gameRunning && !paused) {
+        paused = true;
+        document.getElementById('pauseOverlay').classList.remove('hidden');
+        document.getElementById('pauseButton').style.display = 'none';
+    }
+});
+
+// Optional: You could also auto-resume when they come back, but it's safer to keep it paused
+// window.addEventListener('focus', () => {
+//     // Optionally auto-resume here if you want
+// });
+
+
+
+
     </script>
 </body>
 </html>
