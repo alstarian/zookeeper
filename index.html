@@ -25,6 +25,130 @@
     <style>
 
 
+
+            /* ========================================
+   TABLET/IPAD OPTIMIZATION
+   ======================================== */
+
+@media (min-width: 768px) {
+    /* Center the game in a reasonable play area on larger screens */
+    #gameContainer {
+        max-width: 500px;
+        margin: 0 auto;
+        border-left: 1px solid rgba(102, 126, 234, 0.2);
+        border-right: 1px solid rgba(102, 126, 234, 0.2);
+    }
+    
+    /* Scale up HUD elements */
+    .stat-box {
+        padding: 14px 22px;
+        min-width: 100px;
+    }
+    
+    .stat-label {
+        font-size: 11px;
+    }
+    
+    .stat-value {
+        font-size: 36px;
+    }
+    
+    .heart {
+        width: 14px;
+        height: 14px;
+    }
+    
+    /* Larger pause button */
+    #pauseButton {
+        width: 56px;
+        height: 56px;
+        font-size: 30px;
+    }
+    
+    /* Scale up streak bar */
+    #streakBar {
+        padding: 14px 18px;
+    }
+    
+    .streak-text {
+        font-size: 13px;
+    }
+    
+    .streak-count {
+        font-size: 16px;
+    }
+    
+    .progress-bar {
+        height: 9px;
+    }
+    
+    /* Scale up difficulty indicator */
+    #difficultyIndicator {
+        padding: 10px 16px;
+    }
+    
+    .difficulty-text {
+        font-size: 11px;
+    }
+    
+    .difficulty-level {
+        font-size: 20px;
+    }
+    
+    /* Larger combo */
+    #combo {
+        font-size: 20px;
+        padding: 10px 22px;
+    }
+    
+    /* Scale modals appropriately */
+    .modal {
+        max-width: 450px;
+        padding: 50px 40px;
+    }
+    
+    .pause-modal {
+        max-width: 400px;
+        padding: 50px 40px;
+    }
+    
+    h1 {
+        font-size: 52px;
+    }
+    
+    h2 {
+        font-size: 42px;
+    }
+    
+    .subtitle, .pause-subtitle {
+        font-size: 17px;
+    }
+    
+    button {
+        padding: 20px 50px;
+        font-size: 18px;
+    }
+    
+    /* Scale up animals and basket for larger screen */
+    canvas {
+        /* Animals will be drawn larger via JavaScript adjustment if needed */
+    }
+}
+
+/* Extra large tablets/small desktops */
+@media (min-width: 1024px) {
+    #gameContainer {
+        max-width: 600px;
+    }
+    
+    .modal, .pause-modal {
+        max-width: 500px;
+    }
+}
+
+
+
+
              /* ADD THIS ENTIRE NEW CSS BLOCK */
 #gameInfoBar {
     position: absolute;
@@ -2220,39 +2344,49 @@ function resetGameTracker() {
             ctx.stroke();
         }
 
-        function spawnPowerup() {
-            const speedMultiplier = slowMoActive ? 0.3 : (Math.min(1 + (difficulty * 0.06), 1.8));
+                   function spawnPowerup() {
+                const speedMultiplier = slowMoActive ? 0.3 : (Math.min(1 + (difficulty * 0.06), 1.8));
 
-            powerupNumbers.push({
-                x: Math.random() * (gameWidth - 80) + 40,
-                y: -50,
-                type: powerupType,
-                rotation: 0,
-                speed: powerupType.baseSpeed * speedMultiplier,
-                swerveSpeed: 0.02,
-                swerveAmount: 20,
-                swerveOffset: Math.random() * Math.PI * 2
-            });
-        }
+                powerupNumbers.push({
+                    x: Math.random() * (gameWidth - 80) + 40,
+                    y: -50,
+                    type: powerupType,
+                    rotation: 0,
+                    speed: powerupType.baseSpeed * speedMultiplier,
+                    
+                    // NEW: Randomized motion for powerups too
+                    swerveSpeed: (Math.random() * 0.04 + 0.01) * (Math.random() > 0.5 ? 1 : -1),
+                    swerveAmount: 15 + Math.random() * 30,
+                    swerveOffset: Math.random() * Math.PI * 2,
+                    
+                    // NEW: Random horizontal velocity
+                    vx: (Math.random() - 0.5) * 5
+                });
+            }
 
-        function spawn() {
-            const type = types[Math.floor(Math.random() * types.length)];
+                 function spawn() {
+                const type = types[Math.floor(Math.random() * types.length)];
 
-            const speedMultiplier = slowMoActive ? 0.3 : (Math.min(1 + (difficulty * 0.06), 1.8));
-            const swerveSpeedMultiplier = slowMoActive ? 0.3 : (Math.min(1 + (difficulty * 0.05), 1.5));
-            const swerveAmountMultiplier = Math.min(1 + (difficulty * 0.08), 1.6);
+                const speedMultiplier = slowMoActive ? 0.3 : (Math.min(1 + (difficulty * 0.06), 1.8));
+                const swerveSpeedMultiplier = slowMoActive ? 0.3 : (Math.min(1 + (difficulty * 0.05), 1.5));
+                const swerveAmountMultiplier = Math.min(1 + (difficulty * 0.08), 1.6);
 
-            animals.push({
-                x: Math.random() * (gameWidth - 60) + 30,
-                y: -50,
-                type: type,
-                rotation: 0,
-                speed: type.baseSpeed * speedMultiplier,
-                swerveSpeed: (0.02 + (Math.random() * 0.01)) * swerveSpeedMultiplier,
-                swerveAmount: (25 + (Math.random() * 12)) * swerveAmountMultiplier,
-                swerveOffset: Math.random() * Math.PI * 2
-            });
-        }
+                animals.push({
+                    x: Math.random() * (gameWidth - 60) + 30,
+                    y: -50,
+                    type: type,
+                    rotation: 0,
+                    speed: type.baseSpeed * speedMultiplier,
+                    
+                    // NEW: Much more randomized swerve patterns
+                    swerveSpeed: ((Math.random() * 0.03) + 0.01) * swerveSpeedMultiplier * (Math.random() > 0.5 ? 1 : -1), // Random direction
+                    swerveAmount: (15 + (Math.random() * 35)) * swerveAmountMultiplier, // Random amplitude
+                    swerveOffset: Math.random() * Math.PI * 2, // Random starting phase
+                    
+                    // NEW: Initialize horizontal velocity for bouncing
+                    vx: (Math.random() - 0.5) * 4 // Random initial horizontal speed
+                });
+            }
 
         function drawPlayer() {
             const outerGlow = ctx.createRadialGradient(
@@ -2292,49 +2426,50 @@ function resetGameTracker() {
         }
 
         function drawAnimals() {
-            animals.forEach(a => {
-                a.swerveOffset += a.swerveSpeed;
-                const swerveX = Math.sin(a.swerveOffset) * a.swerveAmount;
+    const emojiSize = window.innerWidth > 768 ? 64 : 48;
+    
+    // Draw animals (with bounce physics handled in game loop)
+    animals.forEach(a => {
+        ctx.save();
+        ctx.translate(a.x, a.y);
+        ctx.rotate(a.rotation);
 
-                ctx.save();
-                ctx.translate(a.x + swerveX, a.y);
-                ctx.rotate(a.rotation);
+        ctx.fillStyle = '#000000';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `${emojiSize}px Arial, "Apple Color Emoji", sans-serif`;
+        ctx.fillText(a.type.emoji, 0, 0);
 
-                ctx.fillStyle = '#000000';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.font = '48px Arial, "Apple Color Emoji", sans-serif';
-                ctx.fillText(a.type.emoji, 0, 0);
+        ctx.restore();
 
-                ctx.restore();
+        a.rotation += slowMoActive ? 0.015 : (0.04 + (difficulty * 0.003));
+        a.currentX = a.x;
+    });
 
-                a.rotation += slowMoActive ? 0.015 : (0.04 + (difficulty * 0.003));
-                a.currentX = a.x + swerveX;
-            });
+    // Draw powerups (smooth swerve, no bounce)
+    powerupNumbers.forEach(p => {
+        p.swerveOffset += p.swerveSpeed;
+        const swerveX = Math.sin(p.swerveOffset) * p.swerveAmount;
 
-            powerupNumbers.forEach(p => {
-                p.swerveOffset += p.swerveSpeed;
-                const swerveX = Math.sin(p.swerveOffset) * p.swerveAmount;
+        ctx.save();
+        ctx.translate(p.x + swerveX, p.y);
 
-                ctx.save();
-                ctx.translate(p.x + swerveX, p.y);
+        ctx.shadowColor = '#00FFFF';
+        ctx.shadowBlur = 20;
 
-                ctx.shadowColor = '#00FFFF';
-                ctx.shadowBlur = 20;
+        ctx.fillStyle = '#000000';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `${emojiSize}px Arial, "Apple Color Emoji", sans-serif`;
+        ctx.fillText(p.type.emoji, 0, 0);
 
-                ctx.fillStyle = '#000000';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.font = '48px Arial, "Apple Color Emoji", sans-serif';
-                ctx.fillText(p.type.emoji, 0, 0);
+        ctx.shadowBlur = 0;
+        ctx.restore();
 
-                ctx.shadowBlur = 0;
-                ctx.restore();
-
-                p.rotation += slowMoActive ? 0.015 : 0.04;
-                p.currentX = p.x + swerveX;
-            });
-        }
+        p.rotation += slowMoActive ? 0.015 : 0.04;
+        p.currentX = p.x + swerveX;
+    });
+}
 
         function checkHit(a) {
             const dx = (a.currentX || a.x) - (player.x + 40);
@@ -2522,71 +2657,93 @@ function resetGameTracker() {
                 }
             }
 
-            for (let i = animals.length - 1; i >= 0; i--) {
-                animals[i].y += animals[i].speed;
+    for (let i = animals.length - 1; i >= 0; i--) {
+    animals[i].y += animals[i].speed;
+    
+    // Add horizontal velocity if it doesn't exist
+    if (animals[i].vx === undefined) {
+        animals[i].vx = (Math.random() - 0.5) * 3;
+    }
+    
+    // Move horizontally
+    animals[i].x += animals[i].vx;
+    
+    // Bounce off left wall - 10% slower
+    if (animals[i].x < 30) {
+        animals[i].x = 30;
+        animals[i].vx = (1.35 + Math.random() * 1.8); // Was 1.5-3.5, now 1.35-3.15
+        createParticles(30, animals[i].y, animals[i].type.color, 8);
+        if (audioCtx) beep(400, 0.06, 'sine', 0.15);
+    }
+    
+    // Bounce off right wall - 10% slower
+    if (animals[i].x > gameWidth - 30) {
+        animals[i].x = gameWidth - 30;
+        animals[i].vx = -(1.35 + Math.random() * 1.8); // Was 1.5-3.5, now 1.35-3.15
+        createParticles(gameWidth - 30, animals[i].y, animals[i].type.color, 8);
+        if (audioCtx) beep(400, 0.06, 'sine', 0.15);
+    }
+    
+    const hit = checkHit(animals[i]);
+    
+    if (hit === true) {
+        catchSound();
+        streak++;
+        updateStreak();
+        
+        gameAchievementTracker.consecutiveCatches++;
+        checkSpeedDemon();
+        checkAchievement('first100');
+        checkAchievement('comboKing');
+        checkAchievement('noMiss');
+        checkAchievement('scoreHero');
+        checkAchievement('zoneExplorer');
+        
+        if (time - lastCatch < 1800) {
+            combo++;
+            if (combo > 1) showCombo();
+            if (combo >= 3) playComboSound(combo);
+        } else {
+            combo = 1;
+        }
+        lastCatch = time;
+        
+        const points = animals[i].type.points * Math.max(1, combo);
+        score += points;
+        
+        rescued[animals[i].type.name] = (rescued[animals[i].type.name] || 0) + 1;
+        animalCounts[animals[i].type.name] = (animalCounts[animals[i].type.name] || 0) + 1;
+        
+        updateScore();
+        updateDifficulty();
+        
+        createParticles(animals[i].x, animals[i].y, animals[i].type.color, 25);
+        
+        animals.splice(i, 1);
+        
+        if (navigator.vibrate) navigator.vibrate(15);
+        continue;
+    }
+    
+    if (animals[i].y > gameHeight - 90) {
+        missSound();
+        lives--;
+        combo = 0;
+        streak = 0;
+        
+        gameAchievementTracker.consecutiveCatches = 0;
+        
+        updateStreak();
+        updateLives();
+        animals.splice(i, 1);
+        
+        if (lives <= 0) {
+            endGame();
+            return;
+        }
+    }
+}
 
-                const hit = checkHit(animals[i]);
-
-                if (hit === true) {
-                    catchSound();
-                    streak++;
-                    updateStreak();
-                    
-                    // NEW: Track catches for achievements
-                    gameAchievementTracker.consecutiveCatches++;
-                    checkSpeedDemon();
-                    checkAchievement('first100');
-                    checkAchievement('comboKing');
-                    checkAchievement('noMiss');
-                    checkAchievement('scoreHero');
-                    checkAchievement('zoneExplorer');
-
-                    if (time - lastCatch < 1800) {
-                        combo++;
-                        if (combo > 1) showCombo();
-                        if (combo >= 3) playComboSound(combo); // NEW: Voice encouragement
-                    } else {
-                        combo = 1;
-                    }
-                    lastCatch = time;
-
-                    const points = animals[i].type.points * Math.max(1, combo);
-                    score += points;
-
-                    rescued[animals[i].type.name] = (rescued[animals[i].type.name] || 0) + 1;
-                    animalCounts[animals[i].type.name] = (animalCounts[animals[i].type.name] || 0) + 1;
-
-                    updateScore();
-                    updateDifficulty();
-
-                    createParticles(animals[i].currentX || animals[i].x, animals[i].y, animals[i].type.color, 25);
-
-                    animals.splice(i, 1);
-
-                    if (navigator.vibrate) navigator.vibrate(15);
-                    continue;
-                }
-
-                            if (animals[i].y > gameHeight - 90) {
-                    missSound();
-                    lives--;
-                    combo = 0;
-                    streak = 0;
-                    
-                    // NEW: Reset perfect streak when missing
-                    gameAchievementTracker.consecutiveCatches = 0;
-                    
-                    updateStreak();
-                    updateLives();
-                    animals.splice(i, 1);
-
-                    if (lives <= 0) {
-                        endGame();
-                        return;
-                    }
-                }
-
-            }
 
             drawAnimals();
             updateParticles();
