@@ -69,22 +69,99 @@
 #pauseButton:active {
     transform: translateX(-50%) scale(0.92);
 }
-          
+
 
             /* Pause overlay - reuses your existing modal styling */
-            #pauseOverlay {
+                     #pauseOverlay {
                 position: fixed;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgba(10, 14, 26, 0.97);
-                backdrop-filter: blur(20px);
+                background: rgba(10, 14, 26, 0.85);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 z-index: 1000;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
             }
+
+                            #pauseOverlay:not(.hidden) {
+                    opacity: 1;
+                    pointer-events: auto;
+                }
+
+
+
+                        /* Pause modal box - centered */
+.pause-modal {
+    background: rgba(20, 25, 40, 0.98);
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-radius: 24px;
+    padding: 40px 32px;
+    width: 85%;
+    max-width: 340px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8),
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    transform: scale(0.85);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#pauseOverlay:not(.hidden) .pause-modal {
+    transform: scale(1);
+}
+
+/* Pause icon */
+.pause-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    animation: pausePulse 2s ease-in-out infinite;
+}
+
+@keyframes pausePulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+/* Pause modal text */
+.pause-modal h2 {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+}
+
+.pause-subtitle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 32px;
+    line-height: 1.5;
+}
+
+/* Pause modal buttons */
+.pause-modal button {
+    margin-top: 12px;
+}
+
+.pause-modal button.secondary {
+    background: rgba(255, 107, 107, 0.15);
+    border: 1px solid rgba(255, 107, 107, 0.4);
+    color: #FF6B6B;
+    box-shadow: none;
+}
+
+.pause-modal button.secondary:active {
+    background: rgba(255, 107, 107, 0.25);
+}
+
+
 
 
 
@@ -106,6 +183,42 @@
                 margin: 0;
                 padding: 0;
             }
+
+
+
+
+                #pauseOverlay:not(.hidden) .modal {
+                    transform: scale(1);
+                }
+
+                /* Pause modal specific styles */
+                #pauseOverlay h2 {
+                    font-size: 32px;
+                    margin-bottom: 16px;
+                }
+
+                #pauseOverlay .subtitle {
+                    font-size: 14px;
+                    margin-bottom: 32px;
+                    color: rgba(255, 255, 255, 0.6);
+                }
+
+                #pauseOverlay button {
+                    margin-top: 12px;
+                }
+
+                #pauseOverlay button.secondary {
+                    background: rgba(255, 107, 107, 0.2);
+                    border: 1px solid rgba(255, 107, 107, 0.4);
+                    color: #FF6B6B;
+                }
+
+                #pauseOverlay button.secondary:active {
+                    background: rgba(255, 107, 107, 0.3);
+                }
+
+
+
 
 
                 /* Make both stat boxes vertically centered and more compact */
@@ -1129,10 +1242,11 @@
                 <div id="pauseButton">⏸️</div>
 
         <!-- Full-screen pause overlay (add this after #gameContainer or at the end of body) -->
-        <div id="pauseOverlay" class="hidden">
-            <div class="modal">
-                <h2>⏸️ Game Paused</h2>
-                <p class="subtitle">Take a break! Tap Resume to continue playing.</p>
+            <div id="pauseOverlay" class="hidden">
+            <div class="pause-modal">
+                <div class="pause-icon">⏸️</div>
+                <h2>Game Paused</h2>
+                <p class="pause-subtitle">Take a break! Tap Resume to continue playing.</p>
                 <button id="resumeButton">Resume Game</button>
                 <button class="secondary" id="quitButton">Quit to Menu</button>
             </div>
@@ -2691,29 +2805,109 @@ document.getElementById('quitButton').addEventListener('click', () => {
 });
 
 
+/// Auto-pause when user switches apps, gets a call, or minimizes browser
 // Auto-pause when user switches apps, gets a call, or minimizes browser
 document.addEventListener('visibilitychange', () => {
-    if (document.hidden && gameRunning && !paused) {
-        // Page is hidden (phone call, app switch, etc.) - auto pause
+    if (document.hidden) {
+        // Page is hidden (phone call, app switch, etc.)
+        if (gameRunning && !paused) {
+            paused = true;
+            const overlay = document.getElementById('pauseOverlay');
+            overlay.classList.remove('hidden');
+            overlay.style.opacity = '1';
+            document.getElementById('pauseButton').style.display = 'none';
+        }
+    } else {
+        // Page is visible again
+        if (gameRunning && paused) {
+            // Ensure pause overlay is visible when returning
+            const overlay = document.getElementById('pauseOverlay');
+            overlay.classList.remove('hidden');
+            overlay.style.opacity = '1';
+            document.getElementById('pauseButton').style.display = 'none';
+        }
+    }
+});
+
+// Also handle when window loses focus
+window.addEventListener('blur', () => {
+    if (gameRunning && !paused) {
         paused = true;
-        document.getElementById('pauseOverlay').classList.remove('hidden');
+        const overlay = document.getElementById('pauseOverlay');
+        overlay.classList.remove('hidden');
+        overlay.style.opacity = '1';
         document.getElementById('pauseButton').style.display = 'none';
     }
 });
 
-// Also handle when window loses focus (additional safety net)
-window.addEventListener('blur', () => {
-    if (gameRunning && !paused) {
-        paused = true;
-        document.getElementById('pauseOverlay').classList.remove('hidden');
+// When window gains focus, ensure pause screen shows if paused
+window.addEventListener('focus', () => {
+    if (gameRunning && paused) {
+        const overlay = document.getElementById('pauseOverlay');
+        overlay.classList.remove('hidden');
+        overlay.style.opacity = '1';
         document.getElementById('pauseButton').style.display = 'none';
     }
 });
+
+
+
 
 // Optional: You could also auto-resume when they come back, but it's safer to keep it paused
 // window.addEventListener('focus', () => {
 //     // Optionally auto-resume here if you want
 // });
+
+
+
+// Pause button functionality
+document.getElementById('pauseButton').addEventListener('click', () => {
+    if (!gameRunning) return;
+    
+    paused = true;
+    const overlay = document.getElementById('pauseOverlay');
+    overlay.classList.remove('hidden');
+    document.getElementById('pauseButton').style.display = 'none';
+    
+    // Add a small delay for the animation to look smooth
+    setTimeout(() => overlay.style.opacity = '1', 10);
+});
+
+// Resume button
+document.getElementById('resumeButton').addEventListener('click', () => {
+    const overlay = document.getElementById('pauseOverlay');
+    overlay.style.opacity = '0';
+    
+    setTimeout(() => {
+        paused = false;
+        overlay.classList.add('hidden');
+        document.getElementById('pauseButton').style.display = 'flex';
+        
+        if (gameRunning && !animationFrameId) {
+            requestAnimationFrame(gameLoop);
+        }
+    }, 300); // Wait for fade out animation
+});
+
+// Quit button
+document.getElementById('quitButton').addEventListener('click', () => {
+    const overlay = document.getElementById('pauseOverlay');
+    overlay.style.opacity = '0';
+    
+    setTimeout(() => {
+        paused = false;
+        gameRunning = false;
+        overlay.classList.add('hidden');
+        document.getElementById('pauseButton').style.display = 'flex';
+        document.getElementById('overlay').classList.remove('hidden');
+        
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
+    }, 300);
+});
+
 
 
 
