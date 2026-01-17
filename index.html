@@ -25,6 +25,24 @@
     <style>
 
 
+             /* ADD THIS ENTIRE NEW CSS BLOCK */
+#gameInfoBar {
+    position: absolute;
+    top: 80px;
+    left: 15px;
+    right: 15px;
+    display: flex;           /* This makes them side-by-side */
+    flex-direction: row;     /* Forces horizontal layout */
+    gap: 10px;               /* Space between the two boxes */
+    z-index: 100;
+}
+
+
+
+
+
+
+
                                         #hud {
                     position: absolute;
                     top: 5px;  /* More aggressive - was 15px */
@@ -375,18 +393,16 @@
         }
 
         #streakBar {
-            position: absolute;
-            top: 80px;
-            left: 15px;
-            right: 15px;
-            background: rgba(15, 20, 35, 0.9);
-            border: 1px solid rgba(255, 215, 0, 0.4);
-            border-radius: 12px;
-            padding: 10px 14px;
-            backdrop-filter: blur(20px);
-            z-index: 100;
-            transition: all 0.3s;
-        }
+    position: relative;    /* CHANGED: was "absolute" */
+    flex: 1;               /* NEW LINE: add this */
+    background: rgba(15, 20, 35, 0.9);
+    border: 1px solid rgba(255, 215, 0, 0.4);
+    border-radius: 12px;
+    padding: 10px 14px;
+    backdrop-filter: blur(20px);
+    transition: all 0.3s;
+}
+
 
         #streakBar.hot {
             border-color: rgba(255, 215, 0, 0.8);
@@ -438,19 +454,17 @@
             font-weight: 600;
         }
 
-        #difficultyIndicator {
-            position: absolute;
-            top: 155px;
-            left: 15px;
-            right: 15px;
+            #difficultyIndicator {
+            position: relative;    /* CHANGED: was "absolute" */
+            flex: 1;               /* NEW LINE: add this */
             background: rgba(15, 20, 35, 0.9);
             border: 1px solid rgba(255, 107, 107, 0.3);
             border-radius: 12px;
             padding: 8px 12px;
             backdrop-filter: blur(20px);
-            z-index: 100;
             text-align: center;
         }
+
 
         .difficulty-text {
             font-size: 9px;
@@ -509,19 +523,17 @@
 /* Optional: Add safe area padding for iPhone notch */
 @supports (padding: env(safe-area-inset-top)) {
     #hud {
-        top: calc(5px + env(safe-area-inset-top)); /* Very tight spacing */
+        top: calc(5px + env(safe-area-inset-top));
         padding: 0 15px;
     }
-    #streakBar {
-        top: calc(80px + env(safe-area-inset-top)); /* Moved up */
-    }
-    #difficultyIndicator {
-        top: calc(155px + env(safe-area-inset-top)); /* Moved up */
+    #gameInfoBar {
+        top: calc(80px + env(safe-area-inset-top)); /* NEW: adjust the wrapper, not the children */
     }
     #combo {
-        top: calc(215px + env(safe-area-inset-top)); /* Moved up */
+        top: calc(155px + env(safe-area-inset-top)); /* CHANGED: was 215px */
     }
 }
+
 
 /* If you want to keep the rounded modal on larger screens: */
 @media (min-width: 768px) {
@@ -716,9 +728,9 @@
             50% { transform: scale(1.03); }
         }
 
-        #combo {
+           #combo {
             position: absolute;
-            top: 215px;
+            top: 155px;    /* CHANGED: was "215px" - moved up 60px */
             left: 50%;
             transform: translateX(-50%) scale(0.8);
             background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
@@ -732,6 +744,7 @@
             z-index: 99;
             box-shadow: 0 8px 24px rgba(255, 215, 0, 0.4);
         }
+
 
         #combo.show {
             opacity: 1;
@@ -1073,14 +1086,11 @@
         top: calc(25px + env(safe-area-inset-top));
         padding: 0 15px;
     }
-    #streakBar {
+    #gameInfoBar {
         top: calc(100px + env(safe-area-inset-top));
     }
-    #difficultyIndicator {
-        top: calc(175px + env(safe-area-inset-top));
-    }
     #combo {
-        top: calc(235px + env(safe-area-inset-top));
+        top: calc(175px + env(safe-area-inset-top));
     }
 }
 
@@ -1089,14 +1099,11 @@
     #hud {
         top: calc(25px + constant(safe-area-inset-top));
     }
-    #streakBar {
+    #gameInfoBar {
         top: calc(100px + constant(safe-area-inset-top));
     }
-    #difficultyIndicator {
-        top: calc(175px + constant(safe-area-inset-top));
-    }
     #combo {
-        top: calc(235px + constant(safe-area-inset-top));
+        top: calc(175px + constant(safe-area-inset-top));
     }
 }
 
@@ -1217,21 +1224,32 @@
             </div>
         </div>
 
-        <div id="streakBar">
-            <div class="streak-info">
-                <span class="streak-text">🔥 STREAK</span>
-                <span class="streak-count" id="streakCount">0/10</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <div class="streak-reward" id="streakReward">Next: +1 Life! ❤️</div>
-        </div>
 
-        <div id="difficultyIndicator">
-            <div class="difficulty-text">Level</div>
-            <div class="difficulty-level" id="diffLevel">1</div>
+            <!-- NEW CODE - ADD THIS ENTIRE BLOCK -->
+<div id="gameInfoBar">
+    <div id="streakBar">
+        <div class="streak-info">
+            <span class="streak-text">🔥 STREAK</span>
+            <span class="streak-count" id="streakCount">0/10</span>
         </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="streak-reward" id="streakReward">Next: +1 Life! ❤️</div>
+    </div>
+
+    <div id="difficultyIndicator">
+        <div class="difficulty-text">Level</div>
+        <div class="difficulty-level" id="diffLevel">1</div>
+    </div>
+</div>
+
+
+
+
+
+
+   
 
         <div id="combo"></div>
 
