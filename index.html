@@ -6,7 +6,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
 
     <meta name="apple-mobile-web-app-title" content="Zoo Keeper Pro">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style
+
+" content="black-translucent">
     <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
     <link rel="icon" type="image/png" sizes="512x512" href="icon.png">
@@ -2285,22 +2287,43 @@ function resetGameTracker() {
             setTimeout(() => div.remove(), 2000);
         }
 
-        function activateSlowMo() {
-            slowMoActive = true;
-            slowMoEndTime = performance.now() + 2500;
-            document.getElementById('slowmoOverlay').classList.add('active');
-            powerupSound();
-            showAchievement('⏱️', 'SLOW MOTION!', '3 seconds activated!');
-            showBigWin('SLOW-MO! ⏱️');
-            createParticles(player.x + 40, player.y + 40, '#00FFFF', 50);
-        }
+              function activateSlowMo() {
+    slowMoActive = true;
+    slowMoEndTime = performance.now() + 2500;  // 2.5 seconds from NOW
+    document.getElementById('slowmoOverlay').classList.add('active');
+    powerupSound();
+    showAchievement('⏱️', 'SLOW MOTION!', '2.5 seconds activated!');
+    showBigWin('SLOW-MO! ⏱️');
+    createParticles(player.x + 40, player.y + 40, '#00FFFF', 50);
 
-        function checkSlowMo(time) {
-            if(slowMoActive && time >= slowMoEndTime) {
-                slowMoActive = false;
-                document.getElementById('slowmoOverlay').classList.remove('active');
+    // Slow down all existing animals
+    animals.forEach(a => {
+        if(!a.baseSpeed) a.baseSpeed = a.speed;
+        if(!a.baseVx && a.vx !== undefined) a.baseVx = a.vx;
+        a.speed *= 0.3;
+        if(a.vx !== undefined) a.vx *= 0.3;
+    });
+}
+
+function checkSlowMo(time) {
+    if(slowMoActive && time >= slowMoEndTime) {
+        slowMoActive = false;
+        document.getElementById('slowmoOverlay').classList.remove('active');
+        
+        // Speed up existing animals back to normal
+        animals.forEach(a => {
+            if(a.baseSpeed) {
+                a.speed = a.baseSpeed;
+                delete a.baseSpeed;
             }
-        }
+            if(a.baseVx !== undefined) {
+                a.vx = a.baseVx;
+                delete a.baseVx;
+            }
+        });
+    }
+}
+
 
         function checkAchievements() {
             if(streak === 5 && !achievements.streak5) {
@@ -2479,6 +2502,7 @@ function resetGameTracker() {
     const emojiSize = window.innerWidth > 768 ? 64 : 48;
     
     // Draw animals
+
     animals.forEach(a => {
         ctx.save();
         ctx.translate(a.x, a.y);
@@ -2681,6 +2705,11 @@ function resetGameTracker() {
         lastDangerSpawn = time;
     }
 
+
+
+
+
+
     // ... rest of your code stays the same ...
 
 
@@ -2781,7 +2810,7 @@ function resetGameTracker() {
         
         if (hit === true) {
             powerupSound();
-            activateSlowMo(time);
+            activateSlowMo();
             powerupsCaught++;
             gameAchievementTracker.powerupsCaughtThisGame++;
             checkAchievement('powerupMaster');
