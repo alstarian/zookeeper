@@ -1470,6 +1470,16 @@
                     </div>
                     <span class="animal-points" style="color: #00FFFF;">SLOW-MO</span>
                 </div>
+
+                 <div class="animal-item" style="border: 2px solid #FF0000; background: rgba(255, 0, 0, 0.1);">
+                <div class="animal-left">
+                    <span class="animal-emoji">💣🧨</span>
+                    <span class="animal-name">Danger!</span>
+                </div>
+                <span class="animal-points" style="color: #FF0000;">-1 LIFE</span>
+                </div>   
+
+
             </div>
 
             
@@ -1725,6 +1735,14 @@
         let highestLevelReached = parseInt(localStorage.getItem('highestLevelReached') || 1);
         let animalCounts = JSON.parse(localStorage.getItem('animalCounts') || '{}');
         let achievements = JSON.parse(localStorage.getItem('achievements') || '{}');
+        let dangerItems = [];
+        let lastDangerSpawn = 0;
+
+
+        const dangerTypes = [
+    { emoji: '💣', name: 'bomb', penalty: -1, color: '#FF0000' },
+    { emoji: '🧨', name: 'tnt', penalty: -1, color: '#FF4500' }
+];
 
 
 
@@ -2010,7 +2028,7 @@ function resetGameTracker() {
             document.getElementById('highScoreText').textContent = `High Score: ${currentHighScore}`;
         }
 
-        updateMainMenuHighScore();
+        // updateMainMenuHighScore();
 
         let audioCtx = null;
         let audioInitialized = false;
@@ -2150,6 +2168,13 @@ function resetGameTracker() {
             { emoji: '🐘', name: 'elephant', points: 40, baseSpeed: 3.0, color: '#A9A9A9', isPowerup: false },
             { emoji: '🦒', name: 'giraffe', points: 45, baseSpeed: 3.2, color: '#DAA520', isPowerup: false }
         ];
+
+
+     
+
+
+
+
 
         const powerupType = {
             emoji: '6️⃣7️⃣',
@@ -2391,6 +2416,28 @@ function resetGameTracker() {
     });
 }
 
+
+        function spawnDanger() {
+    const type = dangerTypes[Math.floor(Math.random() * dangerTypes.length)]; // Random bomb or TNT
+    
+    const speedMultiplier = slowMoActive ? 0.3 : (Math.min(1 + (difficulty * 0.06), 1.8));
+    
+    dangerItems.push({
+        x: Math.random() * (gameWidth - 60) + 30,
+        y: -50,
+        type: type,
+        rotation: 0,
+        speed: 2.0 * speedMultiplier, // Falls a bit slower than animals
+        swerveSpeed: (Math.random() * 0.02) * (Math.random() > 0.5 ? 1 : -1),
+        swerveAmount: 20 + Math.random() * 20,
+        swerveOffset: Math.random() * Math.PI * 2,
+        vx: (Math.random() - 0.5) * 3
+    });
+}
+
+
+
+
         function drawPlayer() {
             const outerGlow = ctx.createRadialGradient(
                 player.x + 40, player.y + 40, 0,
@@ -2431,7 +2478,7 @@ function resetGameTracker() {
         function drawAnimals() {
     const emojiSize = window.innerWidth > 768 ? 64 : 48;
     
-    // Draw animals (with bounce physics handled in game loop)
+    // Draw animals
     animals.forEach(a => {
         ctx.save();
         ctx.translate(a.x, a.y);
@@ -2449,7 +2496,33 @@ function resetGameTracker() {
         a.currentX = a.x;
     });
 
-    // Draw powerups (smooth swerve, no bounce)
+    // NEW: Draw danger items with warning glow
+    dangerItems.forEach(d => {
+        d.swerveOffset += d.swerveSpeed;
+        const swerveX = Math.sin(d.swerveOffset) * d.swerveAmount;
+
+        ctx.save();
+        ctx.translate(d.x + swerveX, d.y);
+        ctx.rotate(d.rotation);
+
+        // Red warning glow
+        ctx.shadowColor = '#FF0000';
+        ctx.shadowBlur = 25;
+
+        ctx.fillStyle = '#000000';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `${emojiSize}px Arial, "Apple Color Emoji", sans-serif`;
+        ctx.fillText(d.type.emoji, 0, 0);
+
+        ctx.shadowBlur = 0;
+        ctx.restore();
+
+        d.rotation += slowMoActive ? 0.02 : 0.06; // Spins faster for warning
+        d.currentX = d.x + swerveX;
+    });
+
+    // Draw powerups
     powerupNumbers.forEach(p => {
         p.swerveOffset += p.swerveSpeed;
         const swerveX = Math.sin(p.swerveOffset) * p.swerveAmount;
@@ -2559,246 +2632,254 @@ function resetGameTracker() {
             }
 
 
-        function gameLoop(time) {
-            if (!gameRunning) return;
+      function gameLoop(time) {
+    if (!gameRunning) return;
 
-            checkSlowMo(time);
+    checkSlowMo(time);
 
-            ctx.clearRect(0, 0, gameWidth, gameHeight);
+    // ALWAYS DRAW THE SCENE (even when paused)
+    ctx.clearRect(0, 0, gameWidth, gameHeight);
+    drawStars();
+    drawGround();
+    drawAnimals();
+    updateParticles();
+    drawPlayer();
 
-            drawStars();
-            drawGround();
-            drawAnimals();         // Shows animals exactly where they stopped
-            updateParticles();     // Lets particles fade nicely (optional — remove if you want total freeze)
-            drawPlayer();
+    // IF PAUSED: Skip all game logic updates
+    if (paused) {
+        animationFrameId = requestAnimationFrame(gameLoop);
+        return;  // Exit early - don't update positions, spawns, collisions
+    }
+
+    // ACTIVE GAME LOGIC (only runs when NOT paused)
+    
+    // Calculate spawn delay based on difficulty
+    const baseSpawnDelay = 1300;
+    const reductionPerLevel = 25;
+    let minSpawnDelay = 700;
+    if (difficulty >= 40) minSpawnDelay = 500;
+    else if (difficulty >= 30) minSpawnDelay = 600;
+    const spawnDelay = Math.max(minSpawnDelay, baseSpawnDelay - (difficulty * reductionPerLevel));
+    
+    // Spawn animals
+    if (time - lastSpawn > spawnDelay) {
+        spawn();  // CHANGED: was spawnAnimal()
+        lastSpawn = time;
+    }
+
+    // Spawn power-ups
+    if (time - lastPowerupSpawn > 15000) {
+        spawnPowerup();
+        lastPowerupSpawn = time;
+    }
+
+    // Spawn danger items
+    if (time - lastDangerSpawn > 3000) {
+        if (Math.random() < 0.3) {
+            spawnDanger();  // CHANGED: was spawnDangerItem()
+        }
+        lastDangerSpawn = time;
+    }
+
+    // ... rest of your code stays the same ...
 
 
-                        // === IF PAUSED: STOP HERE (freeze everything) ===
-                       if (paused) {
-                drawAnimals();
-                updateParticles();
-                drawPlayer();
-                animationFrameId = requestAnimationFrame(gameLoop);  // <-- Add this here too
+    // Update and check animals (ALL YOUR ANIMAL LOGIC HERE)
+    for (let i = animals.length - 1; i >= 0; i--) {
+        animals[i].y += animals[i].speed;
+        
+        // Add horizontal velocity if it doesn't exist
+        if (animals[i].vx === undefined) {
+            animals[i].vx = (Math.random() - 0.5) * 3;
+        }
+        
+        // Move horizontally
+        animals[i].x += animals[i].vx;
+        
+        // Bounce off left wall
+        if (animals[i].x < 30) {
+            animals[i].x = 30;
+            animals[i].vx = (1.35 + Math.random() * 1.8);
+            createParticles(30, animals[i].y, animals[i].type.color, 8);
+            if (audioCtx) beep(400, 0.06, 'sine', 0.15);
+        }
+        
+        // Bounce off right wall
+        if (animals[i].x > gameWidth - 30) {
+            animals[i].x = gameWidth - 30;
+            animals[i].vx = -(1.35 + Math.random() * 1.8);
+            createParticles(gameWidth - 30, animals[i].y, animals[i].type.color, 8);
+            if (audioCtx) beep(400, 0.06, 'sine', 0.15);
+        }
+        
+        const hit = checkHit(animals[i]);
+        
+        if (hit === true) {
+            catchSound();
+            streak++;
+            updateStreak();
+            
+            gameAchievementTracker.consecutiveCatches++;
+            checkSpeedDemon();
+            checkAchievement('first100');
+            checkAchievement('comboKing');
+            checkAchievement('noMiss');
+            checkAchievement('scoreHero');
+            checkAchievement('zoneExplorer');
+            
+            if (time - lastCatch < 1800) {
+                combo++;
+                if (combo > 1) showCombo();
+                if (combo >= 3) playComboSound(combo);
+            } else {
+                combo = 1;
+            }
+            lastCatch = time;
+            
+            const points = animals[i].type.points * Math.max(1, combo);
+            score += points;
+            
+            rescued[animals[i].type.name] = (rescued[animals[i].type.name] || 0) + 1;
+            animalCounts[animals[i].type.name] = (animalCounts[animals[i].type.name] || 0) + 1;
+            
+            updateScore();
+            updateDifficulty();
+            
+            createParticles(animals[i].x, animals[i].y, animals[i].type.color, 25);
+            
+            animals.splice(i, 1);
+            
+            if (navigator.vibrate) navigator.vibrate(15);
+            continue;
+        }
+        
+        // Missed animal - fell off screen
+        if (animals[i].y > gameHeight - 90) {
+            missSound();
+            lives--;
+            combo = 0;
+            streak = 0;
+            
+            gameAchievementTracker.consecutiveCatches = 0;
+            
+            updateStreak();
+            updateLives();
+            animals.splice(i, 1);
+            
+            if (lives <= 0) {
+                endGame();
                 return;
             }
+        }
+    }
 
+    // Update power-up numbers
+    for (let i = powerupNumbers.length - 1; i >= 0; i--) {
+        powerupNumbers[i].y += powerupNumbers[i].speed;
+        
+        const hit = checkHit(powerupNumbers[i]);
+        
+        if (hit === true) {
+            powerupSound();
+            activateSlowMo(time);
+            powerupsCaught++;
+            gameAchievementTracker.powerupsCaughtThisGame++;
+            checkAchievement('powerupMaster');
+            
+            createParticles(powerupNumbers[i].x, powerupNumbers[i].y, '#00FFFF', 30);
+            powerupNumbers.splice(i, 1);
+            
+            if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+            continue;
+        }
+        
+        if (powerupNumbers[i].y > gameHeight) {
+            powerupNumbers.splice(i, 1);
+        }
+    }
 
-
-                        // === ACTIVE GAME LOGIC (ONLY RUNS WHEN NOT PAUSED) ===
-                // Paste ALL your original update code here (exactly as it was)
-                checkSlowMo(time);
-
-
-                                        let baseSpawn = 1300;
-                const reductionPerLevel = 25;
-                let minSpawn = 700;
-
-                // NEW: Slightly faster at high levels
-                if (difficulty >= 40) {
-                    minSpawn = 500;
-                } else if (difficulty >= 30) {
-                    minSpawn = 600;
-                }
-
-                const spawnInterval = Math.max(minSpawn, baseSpawn - (difficulty * reductionPerLevel));
-                if (time - lastSpawn > spawnInterval) {
-                    spawn();
-                    lastSpawn = time;
-                }
-                const powerupInterval = 15000 + Math.random() * 15000;
-                if(time - lastPowerupSpawn > powerupInterval) {
-                    spawnPowerup();
-                    lastPowerupSpawn = time;
-                }
-                if(slowMoActive) {
-                    animals.forEach(a => {
-                        if(a.speed > a.type.baseSpeed * 0.3) {
-                            a.speed = a.type.baseSpeed * 0.3;
-                            a.swerveSpeed = a.swerveSpeed * 0.3;
-                        }
-                    });
-                    powerupNumbers.forEach(p => {
-                        if(p.speed > p.type.baseSpeed * 0.3) {
-                            p.speed = p.type.baseSpeed * 0.3;
-                        }
-                    });
-                } else {
-                    animals.forEach(a => {
-                        const targetSpeed = a.type.baseSpeed * Math.min(1 + (difficulty * 0.06), 1.8);
-                        if(a.speed < targetSpeed) {
-                            a.speed = targetSpeed;
-                            a.swerveSpeed = (0.02 + (Math.random() * 0.01)) * Math.min(1 + (difficulty * 0.05), 1.5);
-                        }
-                    });
-                    powerupNumbers.forEach(p => {
-                        const targetSpeed = p.type.baseSpeed * Math.min(1 + (difficulty * 0.06), 1.8);
-                        if(p.speed < targetSpeed) {
-                            p.speed = targetSpeed;
-                        }
-                    });
-                }
-
-            for(let i = powerupNumbers.length - 1; i >= 0; i--) {
-                powerupNumbers[i].y += powerupNumbers[i].speed;
-
-                const hit = checkHit(powerupNumbers[i]);
-
-                             if(hit) {
-                        powerupsCaught++;
-                        
-                        // NEW: Track powerup for achievement
-                        gameAchievementTracker.powerupsCaughtThisGame++;
-                        
-                        activateSlowMo();
-                        score += powerupNumbers[i].type.points;
-                        updateScore();
-                        powerupNumbers.splice(i, 1);
-                        checkAchievements();
-                        
-                        // NEW: Check powerup achievement
-                        checkAchievement('powerupMaster');
-                        
-                        if(navigator.vibrate) navigator.vibrate([50, 30, 50]);
-                        continue;
-                    }
-
-
-                if(powerupNumbers[i].y > gameHeight - 90) {
-                    powerupNumbers.splice(i, 1);
-                }
+    // Update danger items
+    for (let i = dangerItems.length - 1; i >= 0; i--) {
+        dangerItems[i].y += dangerItems[i].speed;
+        
+        const hit = checkHit(dangerItems[i]);
+        
+        if (hit === true) {
+            missSound();
+            lives += dangerItems[i].type.penalty;
+            createParticles(dangerItems[i].x, dangerItems[i].y, dangerItems[i].type.color, 20);
+            dangerItems.splice(i, 1);
+            updateLives();
+            
+            if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+            
+            if (lives <= 0) {
+                endGame();
+                return;
             }
+            continue;
+        }
+        
+        if (dangerItems[i].y > gameHeight) {
+            dangerItems.splice(i, 1);
+        }
+    }
 
-    for (let i = animals.length - 1; i >= 0; i--) {
-    animals[i].y += animals[i].speed;
-    
-    // Add horizontal velocity if it doesn't exist
-    if (animals[i].vx === undefined) {
-        animals[i].vx = (Math.random() - 0.5) * 3;
-    }
-    
-    // Move horizontally
-    animals[i].x += animals[i].vx;
-    
-    // Bounce off left wall - 10% slower
-    if (animals[i].x < 30) {
-        animals[i].x = 30;
-        animals[i].vx = (1.35 + Math.random() * 1.8); // Was 1.5-3.5, now 1.35-3.15
-        createParticles(30, animals[i].y, animals[i].type.color, 8);
-        if (audioCtx) beep(400, 0.06, 'sine', 0.15);
-    }
-    
-    // Bounce off right wall - 10% slower
-    if (animals[i].x > gameWidth - 30) {
-        animals[i].x = gameWidth - 30;
-        animals[i].vx = -(1.35 + Math.random() * 1.8); // Was 1.5-3.5, now 1.35-3.15
-        createParticles(gameWidth - 30, animals[i].y, animals[i].type.color, 8);
-        if (audioCtx) beep(400, 0.06, 'sine', 0.15);
-    }
-    
-    const hit = checkHit(animals[i]);
-    
-    if (hit === true) {
-        catchSound();
-        streak++;
-        updateStreak();
-        
-        gameAchievementTracker.consecutiveCatches++;
-        checkSpeedDemon();
-        checkAchievement('first100');
-        checkAchievement('comboKing');
-        checkAchievement('noMiss');
-        checkAchievement('scoreHero');
-        checkAchievement('zoneExplorer');
-        
-        if (time - lastCatch < 1800) {
-            combo++;
-            if (combo > 1) showCombo();
-            if (combo >= 3) playComboSound(combo);
-        } else {
-            combo = 1;
-        }
-        lastCatch = time;
-        
-        const points = animals[i].type.points * Math.max(1, combo);
-        score += points;
-        
-        rescued[animals[i].type.name] = (rescued[animals[i].type.name] || 0) + 1;
-        animalCounts[animals[i].type.name] = (animalCounts[animals[i].type.name] || 0) + 1;
-        
-        updateScore();
-        updateDifficulty();
-        
-        createParticles(animals[i].x, animals[i].y, animals[i].type.color, 25);
-        
-        animals.splice(i, 1);
-        
-        if (navigator.vibrate) navigator.vibrate(15);
-        continue;
-    }
-    
-    if (animals[i].y > gameHeight - 90) {
-        missSound();
-        lives--;
-        combo = 0;
-        streak = 0;
-        
-        gameAchievementTracker.consecutiveCatches = 0;
-        
-        updateStreak();
-        updateLives();
-        animals.splice(i, 1);
-        
-        if (lives <= 0) {
-            endGame();
-            return;
-        }
-    }
+    // Continue loop
+    animationFrameId = requestAnimationFrame(gameLoop);
 }
 
 
-            drawAnimals();
-            updateParticles();
-            drawPlayer();
-            animationFrameId = requestAnimationFrame(gameLoop);
-        }
 
-        function startGame() {
-            initAudio();
+function startGame() {
+    initAudio();
+    console.log("START GAME CALLED!");
 
-              // NEW: Reset achievement tracker
-                resetGameTracker();
+    // NEW: Reset achievement tracker
+    resetGameTracker();
 
-            totalPlays++;
-            localStorage.setItem('totalPlays', totalPlays);
+    totalPlays++;
+    localStorage.setItem('totalPlays', totalPlays);
 
-            document.getElementById('overlay').classList.add('hidden');
-            document.getElementById('statsScreen').classList.add('hidden');
-            document.getElementById('leaderboardScreen').classList.add('hidden');
-            gameRunning = true;
-            score = 0;
-            lives = 3;
-            combo = 0;
-            streak = 0;
-            maxStreak = 0;
-            difficulty = 1;
-            maxDifficulty = 1;
-            animals = [];
-            powerupNumbers = [];
-            particles = [];
-            rescued = {};
-            slowMoActive = false;
-            powerupsCaught = 0;
-            player.x = gameWidth / 2 - 40;
-            updateScore();
-            updateStreak();
-            updateStreakReward();
-            updateLives();
-            updateDifficultyDisplay();
-            lastSpawn = performance.now();
-            lastPowerupSpawn = performance.now() + 10000;
-            document.getElementById('pauseButton').style.display = 'flex';
-            requestAnimationFrame(gameLoop);
-        }
+    dangerItems = []; // Add this line
+    lastDangerSpawn = performance.now() + 10000;
+
+    document.getElementById('overlay').classList.add('hidden');
+    document.getElementById('statsScreen').classList.add('hidden');
+    document.getElementById('leaderboardScreen').classList.add('hidden');
+    gameRunning = true;
+    paused = false;  // ADD THIS LINE - make sure game isn't paused
+    score = 0;
+    lives = 3;
+    combo = 0;
+    streak = 0;
+    maxStreak = 0;
+    difficulty = 1;
+    maxDifficulty = 1;
+    animals = [];
+    powerupNumbers = [];
+    particles = [];
+    rescued = {};
+    slowMoActive = false;
+    powerupsCaught = 0;
+    player.x = gameWidth / 2 - 40;
+    
+    updateZoneTheme(1);  // ADD THIS LINE - Reset canvas background to level 1
+    
+    updateScore();
+    updateStreak();
+    updateStreakReward();
+    updateLives();
+    updateDifficultyDisplay();
+    lastSpawn = performance.now();
+    lastPowerupSpawn = performance.now() + 10000;
+    document.getElementById('pauseButton').style.display = 'flex';
+    
+    // CHANGED: Start the game loop properly
+    animationFrameId = requestAnimationFrame(gameLoop);  // Changed from requestAnimationFrame
+}
+
+
 
         function endGame() {
             gameRunning = false;
@@ -2857,6 +2938,7 @@ function resetGameTracker() {
                 } else {
                     document.getElementById('newHighScore').classList.add('hidden');
                     document.getElementById('gameOverTitle').textContent = 'Amazing Run!';
+
 
                     const diff = highScore - score;
                     const urgeEl = document.getElementById('urgePlayAgain');
